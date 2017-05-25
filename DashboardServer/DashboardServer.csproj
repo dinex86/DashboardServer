@@ -46,6 +46,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>DashboardServer.DashboardServer</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -69,6 +72,9 @@
     <Compile Include="ExchangeData.cs" />
     <Compile Include="Collector.cs" />
     <Compile Include="DashboardServer.cs" />
+    <Compile Include="Game\AssettoCorsaGame.cs" />
+    <Compile Include="Game\AbstractGame.cs" />
+    <Compile Include="Game\RaceRoomGame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -78,6 +84,10 @@
     <ProjectReference Include="..\..\..\..\..\Source\Repos\websocket-sharp\websocket-sharp\websocket-sharp.csproj">
       <Project>{B357BAC7-529E-4D81-A0D2-71041B19C8DE}</Project>
       <Name>websocket-sharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\assettocorsasharedmemory\AssettoCorsaSharedMemory.csproj">
+      <Project>{020af3ed-0a4c-4215-9b1d-1d41dd26f8bb}</Project>
+      <Name>AssettoCorsaSharedMemory</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -92,5 +102,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
