@@ -12,106 +12,144 @@ using System.Threading.Tasks;
 
 namespace DashboardServer.Game
 {
-    class RaceRoomGame : AbstractGame, IDisposable
+    class RaceRoomGame : AbstractGame
+    {
+        public override event UpdateEventHandler Update;
+
+        private ExchangeData data = new ExchangeData();
+        private Thread updateThread = null;
+
+        public override bool IsRunning
         {
-        private bool Mapped
-        {
-            get { return (_file != null); }
+            get {
+                return Utilities.IsRrreRunning();
+            }
         }
 
-        public Shared data
+        public override void Start()
         {
-            private set;
-            get;
+            Console.WriteLine("Starting collector for RaceRoom Racing Experience!");
+
+            updateThread = new Thread(new ThreadStart(Run));
+            updateThread.Start();
         }
 
-        private MemoryMappedFile _file;
-        private byte[] _buffer;
-
-        private readonly TimeSpan _timeAlive = TimeSpan.FromMinutes(10);
-        private readonly TimeSpan _timeInterval = TimeSpan.FromMilliseconds(100);
-
-        public void Dispose()
+        public override void Stop()
         {
-            _file.Dispose();
-        }
+            Console.WriteLine("Starting collector for RaceRoom Racing Experience!");
 
-        public override void Run()
-        {
-            var timeReset = DateTime.UtcNow;
-            var timeLast = timeReset;
-
-            Console.WriteLine("Looking for RRRE.exe...");
-
-            while (true)
+            if (updateThread != null)
             {
-                var timeNow = DateTime.UtcNow;
+                updateThread.Abort();
+            }
+        }
 
-                if (timeNow.Subtract(timeReset) > _timeAlive)
+        private void Run()
+        {
+            while (IsRunning)
+            {
+                MemoryMappedFile file = null;
+
+                try
                 {
-                    break;
-                }
+                    byte[] buffer = null;
 
-                if (timeNow.Subtract(timeLast) < _timeInterval)
-                {
-                    Thread.Sleep(1);
-                    continue;
-                }
-
-                timeLast = timeNow;
-
-                if (Utilities.IsRrreRunning() && !Mapped)
-                {
-                    Console.WriteLine("Found RRRE.exe, mapping shared memory...");
-
-                    if (Map())
+                    while (file == null)
                     {
-                        Console.WriteLine("Memory mapped successfully");
-                        timeReset = DateTime.UtcNow;
+                        Console.WriteLine("Mapping R3E shared memory...");
 
-                        _buffer = new Byte[Marshal.SizeOf(typeof(Shared))];
+                        try
+                        {
+                            file = MemoryMappedFile.OpenExisting(Constant.SharedMemoryName);
+                            Console.WriteLine("Memory mapped successfully.");
+                            buffer = new Byte[Marshal.SizeOf(typeof(Shared))];
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            // Game not ready, wait a little bit.
+                            Thread.Sleep(500);
+                            continue;
+                        }
+                    }
+
+                    while (true)
+                    {
+                        if (Update != null)
+                        {
+                            var view = file.CreateViewStream();
+                            BinaryReader stream = new BinaryReader(view);
+                            buffer = stream.ReadBytes(Marshal.SizeOf(typeof(Shared)));
+                            GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+
+                            Shared data = (Shared)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(Shared));
+                            handle.Free();
+                            stream.Close();
+                            view.Close();
+
+                            UpdateExchangeData(data);
+                        }
+
+                        Thread.Sleep(50);
+                    }
+                }
+                catch (Exception)
+                {
+                    if (file != null)
+                    {
+                        file.Dispose();
+                    }
+                    file = null;
+                }
+                finally
+                {
+                    if (file != null)
+                    {
+                        file.Dispose();
                     }
                 }
             }
 
-            Console.WriteLine("All done!");
+            Console.WriteLine("All done with R3E!");
         }
 
-        private bool Map()
+        private void UpdateExchangeData(Shared shared)
         {
-            try
+            if (shared.EngineRps > -1.0f)
             {
-                _file = MemoryMappedFile.OpenExisting(Constant.SharedMemoryName);
-                return true;
+                //  RPM = Math.Round(Utilities.RpsToRpm(data.EngineRps));
             }
-            catch (FileNotFoundException)
-            {
-                return false;
-            }
-        }
 
-        public override bool Update()
-        {
-            try
-            {
-                var _view = _file.CreateViewStream();
-                BinaryReader _stream = new BinaryReader(_view);
-                _buffer = _stream.ReadBytes(Marshal.SizeOf(typeof(Shared)));
-                GCHandle _handle = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
-                data = (Shared)Marshal.PtrToStructure(_handle.AddrOfPinnedObject(), typeof(Shared));
-                _handle.Free();
+            data.CarSpeed = (int)Math.Round(Utilities.MpsToKph(shared.CarSpeed));
+            data.Gear = shared.Gear;
+            data.MaxEngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.MaxEngineRps));
+            data.EngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.EngineRps));
+            data.DrsAvailable = shared.Drs.Available;
+            data.DrsEngaged = shared.Drs.Engaged;
+            data.DrsEquipped = shared.Drs.Equipped;
+            data.DrsNumActivationsLeft = shared.Drs.NumActivationsLeft;
+            data.FuelLapsLeftEstimate = -1;
+            data.FuelLeft = -1;
+            data.FuelPerLap = -1;
+            data.NumberOfLaps = shared.NumberOfLaps;
+            data.CompletedLaps = shared.CompletedLaps;
+            data.Position = shared.Position;
+            data.NumCars = shared.NumCars;
 
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
+            data.LapTimeCurrentSelf = Math.Round(shared.LapTimeCurrentSelf, 3);
+            data.LapTimePreviousSelf = Math.Round(shared.LapTimePreviousSelf, 3);
+            data.LapTimeBestSelf = Math.Round(shared.LapTimeBestSelf, 3);
+            data.LapTimeBestLeader = Math.Round(shared.LapTimeBestLeader, 3);
+            data.LapTimeBestLeaderClass = Math.Round(shared.LapTimeBestLeaderClass, 3);
+            data.SessionTimeRemaining = Math.Round(shared.SessionTimeRemaining, 3);
+            data.LapTimeDeltaLeader = Math.Round(shared.LapTimeDeltaLeader, 3);
+            data.LapTimeDeltaLeaderClass = Math.Round(shared.LapTimeDeltaLeaderClass, 3);
+            data.TimeDeltaBehind = Math.Round(shared.TimeDeltaBehind, 3);
+            data.TimeDeltaFront = Math.Round(shared.TimeDeltaFront, 3);
 
-        public override ExchangeData GetData()
-        {
-            return new ExchangeData(data);
+            data.YellowFlagAhead = shared.ClosestYellowDistanceIntoTrack > 0 && shared.ClosestYellowDistanceIntoTrack < 1000;
+            data.CurrentSector = shared.TrackSector;
+
+            Update?.Invoke(data);
         }
     }
 }

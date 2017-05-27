@@ -9,13 +9,12 @@ using System.Text;
 using R3E;
 using WebSocketSharp.Server;
 using WebSocketSharp;
+using DashboardServer.Game;
 
 namespace DashboardServer
 {
     public class Data : WebSocketBehavior
     {
-        private Sample r3e = new Sample();
-
         protected override void OnOpen()
         {
             Console.WriteLine("Welcoming new client with IP " + Context.UserEndPoint + ".");
@@ -27,7 +26,8 @@ namespace DashboardServer
             try
             {
                 Send(data.ToJSON());
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 // Remove listener if connection was lost.
                 if (State != WebSocketSharp.WebSocketState.Open)
@@ -52,18 +52,14 @@ namespace DashboardServer
 
     class DashboardServer
     {
-        public static Collector Listener
-        {
-            get;
-            private set;
-        }
+        public static Collector Listener = new Collector();
 
         public static void Main(string[] args)
         {
             // Start listener as separate thread.
             Listener = new Collector();
-            Thread newThread = new Thread(new ThreadStart(Listener.Run));
-            newThread.Start();
+            Thread listenerThread = new Thread(new ThreadStart(Listener.Run));
+            listenerThread.Start();
 
             // Start web socket server.
             var wssv = new WebSocketServer("ws://localhost:8080");

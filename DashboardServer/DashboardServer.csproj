@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>DashboardServer</RootNamespace>
     <AssemblyName>DashboardServer</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
@@ -26,6 +26,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -69,7 +70,6 @@
     <Compile Include="..\..\..\..\..\Source\Repos\r3e-api\sample-csharp\src\Utilities.cs">
       <Link>R3E\Utilities.cs</Link>
     </Compile>
-    <Compile Include="ExchangeData.cs" />
     <Compile Include="Collector.cs" />
     <Compile Include="DashboardServer.cs" />
     <Compile Include="Game\AssettoCorsaGame.cs" />

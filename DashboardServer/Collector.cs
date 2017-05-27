@@ -18,49 +18,51 @@ namespace DashboardServer
     {
         public delegate void UpdateEventHandler(ExchangeData data);
         public event UpdateEventHandler Update;
-        
-        public void Run() {
-            Console.WriteLine("Looking for a game...");
 
-            Thread updateThread = null;
+        public void Run()
+        {
+            List<AbstractGame> games = new List<AbstractGame>();
+            games.Add(new AssettoCorsaGame());
+            games.Add(new RaceRoomGame());
+
+            Console.WriteLine("Looking for a game...");
+            
             AbstractGame runningGame = null;
             while (true)
             {
                 while (runningGame == null)
                 {
-                    if (Utilities.IsRrreRunning())
+                    foreach (AbstractGame game in games)
                     {
-                        Console.WriteLine("R3E is running!");
-                        runningGame = new RaceRoomGame();
+                        if (game.IsRunning)
+                        {
+                            runningGame = game;
+                            runningGame.Update += DataUpdated;
+                            runningGame.Start();
+                            break;
+                        }
                     }
 
                     Thread.Sleep(1000);
                 }
 
-                if (updateThread != null && !updateThread.IsAlive)
+                // Game still running?
+                if (runningGame != null && !runningGame.IsRunning)
                 {
-                    // Reset.
+                    runningGame.Stop();
                     runningGame = null;
-                    updateThread = null;
-                }
-                else
-                {
-                    if (updateThread == null)
-                    {
-                        Console.WriteLine("Starting listener.");
-
-                        updateThread = new Thread(new ThreadStart(runningGame.Run));
-                        updateThread.Start();
-                    }
-
-                    if (Update != null && runningGame.Update())
-                    {
-                        ExchangeData data = runningGame.GetData();
-                        Update(data);
-                    }
                 }
 
-                Thread.Sleep(50);
+                // Wait for next try.
+                Thread.Sleep(1000);
+            }
+        }
+
+        private void DataUpdated(ExchangeData data)
+        {
+            if (Update != null)
+            {
+                Update(data);
             }
         }
     }
