@@ -123,10 +123,22 @@ namespace DashboardServer.Game
             data.Gear = shared.Gear;
             data.MaxEngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.MaxEngineRps));
             data.EngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.EngineRps));
+
             data.DrsAvailable = shared.Drs.Available;
             data.DrsEngaged = shared.Drs.Engaged;
             data.DrsEquipped = shared.Drs.Equipped;
             data.DrsNumActivationsLeft = shared.Drs.NumActivationsLeft;
+
+            data.PushToPassEquipped = shared.PushToPass.Available;
+            data.PushToPassAvailable = shared.PushToPass.Available;
+            data.PushToPassEngaged = shared.PushToPass.Engaged;
+            data.PushToPassNumActivationsLeft = shared.PushToPass.AmountLeft;
+            data.PushToPassEngagedTimeLeft = shared.PushToPass.EngagedTimeLeft;
+            data.PushToPassWaitTimeLeft = shared.PushToPass.WaitTimeLeft;
+
+            data.OilTemperature = shared.EngineOilTemp;
+            data.WaterTemperature = shared.EngineWaterTemp;
+
             data.FuelLapsLeftEstimate = -1;
             data.FuelLeft = -1;
             data.FuelPerLap = -1;

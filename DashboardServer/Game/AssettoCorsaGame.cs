@@ -95,6 +95,9 @@ namespace DashboardServer.Game
             data.NumCars = e.StaticInfo.NumCars;
             data.DrsEquipped = e.StaticInfo.HasDRS;
 
+            data.ErsEquipped = e.StaticInfo.HasERS;
+            data.KersEquipped = e.StaticInfo.HasKERS;
+
             Update(data);
         }
 
@@ -112,8 +115,10 @@ namespace DashboardServer.Game
             data.DrsAvailable = e.Physics.DrsAvailable;
             data.DrsEngaged = e.Physics.DrsEnabled;
             data.PitLimiter = e.Physics.PitLimiterOn;
+
             data.AirTemperature = e.Physics.AirTemp;
             data.TrackTemperature = e.Physics.RoadTemp;
+
             data.Delta = e.Physics.PerformanceMeter;
             
             Update(data);

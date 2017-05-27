@@ -21,24 +21,45 @@ namespace DashboardServer.Game
 
     public class ExchangeData
     {
+        // Basic data.
         public int CarSpeed { get; internal set; }
         public int Gear { get; internal set; }
         public int MaxEngineRpm { get; internal set; }
         public int EngineRpm { get; internal set; }
 
+        // DRS.
+        public int DrsEquipped { get; internal set; }
         public int DrsAvailable { get; internal set; }
         public int DrsEngaged { get; internal set; }
-        public int DrsEquipped { get; internal set; }
         public int DrsNumActivationsLeft { get; internal set; }
 
+        // ERS.
+        public int ErsEquipped { get; internal set; }
+
+        // KERS.
+        public int KersEquipped { get; internal set; }
+
+        // P2P.
+        public int PushToPassEquipped { get; internal set; }
+        public int PushToPassAvailable { get; internal set; }
+        public int PushToPassEngaged { get; internal set; }
+        public int PushToPassNumActivationsLeft { get; internal set; }
+        public double PushToPassEngagedTimeLeft { get; internal set; }
+        public double PushToPassWaitTimeLeft { get; internal set; }
+
+        // Fuel.
         public double FuelLapsLeftEstimate { get; internal set; }
         public double FuelLeft { get; internal set; }
         public double FuelPerLap { get; internal set; }
         public double FuelMax { get; internal set; }
+
+        // Misc.
         public int NumberOfLaps { get; internal set; }
         public int CompletedLaps { get; internal set; }
         public int Position { get; internal set; }
         public int NumCars { get; internal set; }
+        public int PitLimiter { get; internal set; }
+        public double DistanceTravelled { get; internal set; }
 
         // Lap times.
         public double LapTimeCurrentSelf { get; internal set; }
@@ -55,14 +76,15 @@ namespace DashboardServer.Game
         public double TimeDeltaBehind { get; internal set; }
         public double TimeDeltaFront { get; internal set; }
 
+        // Sector stuff and flags.
         public bool YellowFlagAhead { get; internal set; }
         public int CurrentSector { get; internal set; }
-
-        public int PitLimiter { get; internal set; }
-        public double DistanceTravelled { get; internal set; }
-
+        
+        // Temperatures.
         public double AirTemperature { get; internal set; }
         public double TrackTemperature { get; internal set; }
+        public double OilTemperature { get; internal set; }
+        public double WaterTemperature { get; internal set; }
 
         public String ToJSON()
         {
