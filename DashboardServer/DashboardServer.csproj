@@ -61,18 +61,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\..\Source\Repos\r3e-api\sample-csharp\src\R3E.cs">
-      <Link>R3E\R3E.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\..\..\Source\Repos\r3e-api\sample-csharp\src\Utilities.cs">
-      <Link>R3E\Utilities.cs</Link>
-    </Compile>
     <Compile Include="Collector.cs" />
     <Compile Include="DashboardServer.cs" />
     <Compile Include="Game\AssettoCorsaGame.cs" />
     <Compile Include="Game\AbstractGame.cs" />
     <Compile Include="Game\RaceRoomGame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="R3E\R3E.cs" />
+    <Compile Include="R3E\Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
