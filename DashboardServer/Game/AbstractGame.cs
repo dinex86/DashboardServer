@@ -22,6 +22,18 @@ namespace DashboardServer.Game
 
     public class ExchangeData
     {
+        public enum FlagIndex
+        {
+            GREEN = 0,
+            YELLOW = 1,
+            BLUE = 2,
+            BLACK = 3,
+            BLACK_WHITE = 4,
+            WHITE = 5,
+            CHECKERED = 6,
+            PENALTY = 7
+        }
+
         // Internal.
         private int _laps;
         private Dictionary<int, double> _fuelPerLap = new Dictionary<int, double>();
@@ -113,14 +125,14 @@ namespace DashboardServer.Game
         public double LapTimeBestLeaderClass { get; internal set; }
 
         // Deltas.
-        public double Delta { get; internal set; }
+        public double DeltaBestSelf { get; internal set; }
+        public double DeltaBestSession { get; internal set; }
         public double LapTimeDeltaLeader { get; internal set; }
         public double LapTimeDeltaLeaderClass { get; internal set; }
         public double TimeDeltaBehind { get; internal set; }
         public double TimeDeltaFront { get; internal set; }
 
         // Sector stuff and flags.
-        public bool YellowFlagAhead { get; internal set; }
         public int CurrentSector { get; internal set; }
         
         // Temperatures.
@@ -128,7 +140,14 @@ namespace DashboardServer.Game
         public double TrackTemperature { get; internal set; }
         public double OilTemperature { get; internal set; }
         public double WaterTemperature { get; internal set; }
-        
+
+        // Flag.
+        public bool YellowFlagAhead { get; internal set; }
+        public int CurrentFlag { get; internal set; }
+        public int YellowSector1 { get; internal set; }
+        public int YellowSector2 { get; internal set; }
+        public int YellowSector3 { get; internal set; }
+
         public String ToJSON()
         {
             StringBuilder sb = new StringBuilder();

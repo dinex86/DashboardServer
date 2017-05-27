@@ -21,7 +21,8 @@ namespace DashboardServer.Game
 
         public override bool IsRunning
         {
-            get {
+            get
+            {
                 return Utilities.IsRrreRunning();
             }
         }
@@ -139,14 +140,13 @@ namespace DashboardServer.Game
             data.OilTemperature = shared.EngineOilTemp;
             data.WaterTemperature = shared.EngineWaterTemp;
 
-            data.FuelLapsLeftEstimate = -1;
-            data.FuelLeft = -1;
-            data.FuelPerLap = -1;
-            data.NumberOfLaps = shared.NumberOfLaps;
+            data.FuelLeft = shared.FuelLeft;
+            data.NumberOfLaps = (shared.SessionLengthFormat == 0) ? shared.NumberOfLaps : -1;
             data.CompletedLaps = shared.CompletedLaps;
             data.Position = shared.Position;
             data.NumCars = shared.NumCars;
 
+            // Timing.
             data.LapTimeCurrentSelf = Math.Round(shared.LapTimeCurrentSelf, 3);
             data.LapTimePreviousSelf = Math.Round(shared.LapTimePreviousSelf, 3);
             data.LapTimeBestSelf = Math.Round(shared.LapTimeBestSelf, 3);
@@ -158,10 +158,85 @@ namespace DashboardServer.Game
             data.TimeDeltaBehind = Math.Round(shared.TimeDeltaBehind, 3);
             data.TimeDeltaFront = Math.Round(shared.TimeDeltaFront, 3);
 
-            data.YellowFlagAhead = shared.ClosestYellowDistanceIntoTrack > 0 && shared.ClosestYellowDistanceIntoTrack < 1000;
+            // Delta.
+            data.DeltaBestSelf = CalcSectorDiff(shared.SectorTimesCurrentSelf, shared.SectorTimesPreviousSelf, shared.SectorTimesBestSelf);
+            data.DeltaBestSession = CalcSectorDiff(shared.SectorTimesCurrentSelf, shared.SectorTimesPreviousSelf, shared.SectorTimesSessionBestLap);
+
             data.CurrentSector = shared.TrackSector;
 
+            // Flags.
+            data.YellowFlagAhead = shared.ClosestYellowDistanceIntoTrack > 0 && shared.ClosestYellowDistanceIntoTrack < 1000;
+            data.YellowSector1 = shared.SectorYellow.Sector1;
+            data.YellowSector2 = shared.SectorYellow.Sector2;
+            data.YellowSector3 = shared.SectorYellow.Sector3;
+
+            if (shared.ExtendedFlags.Green == 1)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.GREEN;
+            }
+            else if (shared.Flags.Yellow == 1)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.YELLOW;
+            }
+            else if (shared.Flags.Black == 1)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.BLACK;
+            }
+            else if (shared.Flags.Blue == 1)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.BLUE;
+            }
+            else if (shared.ExtendedFlags.Checkered == 1)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.CHECKERED;
+            }
+            else if (shared.ExtendedFlags.BlackAndWhite > 0)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.BLACK_WHITE;
+            }
+            
             Update?.Invoke(data);
+        }
+
+        private float CalcSectorDiff(Sectors<float> current, Sectors<float> last, Sectors<float> best)
+        {
+            if (best.Sector1 == 0)
+            {
+                return 0;
+            }
+
+            Sectors<float> compare;
+            if (current.Sector1 == 0)
+            {
+                if (last.Sector1 == 0)
+                {
+                    return 0;
+                }
+
+                compare = last;
+            }
+            else
+            {
+                compare = current;
+            }
+
+            float delta = 0;
+            if (compare.Sector1 > 0)
+            {
+                delta += compare.Sector1 - best.Sector1;
+            }
+
+            if (compare.Sector2 > 0)
+            {
+                delta += compare.Sector2 - best.Sector2;
+            }
+
+            if (compare.Sector3 > 0)
+            {
+                delta += compare.Sector2 - best.Sector2;
+            }
+
+            return delta;
         }
     }
 }

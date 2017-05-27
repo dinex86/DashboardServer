@@ -82,6 +82,29 @@ namespace DashboardServer.Game
             data.LapTimeBestSelf = Math.Round(e.Graphics.iBestTime / 1000.0, 3);
             data.SessionTimeRemaining = Math.Round(e.Graphics.SessionTimeLeft / 1000.0, 3);
             data.CurrentSector = e.Graphics.CurrentSectorIndex;
+
+            // Flags.
+            switch (e.Graphics.Flag)
+            {
+                case AC_FLAG_TYPE.AC_BLACK_FLAG:
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.BLACK;
+                    break;
+                case AC_FLAG_TYPE.AC_BLUE_FLAG:
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.BLUE;
+                    break;
+                case AC_FLAG_TYPE.AC_CHECKERED_FLAG:
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.CHECKERED;
+                    break;
+                case AC_FLAG_TYPE.AC_NO_FLAG:
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.GREEN;
+                    break;
+                case AC_FLAG_TYPE.AC_WHITE_FLAG:
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.WHITE;
+                    break;
+                case AC_FLAG_TYPE.AC_PENALTY_FLAG:
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.PENALTY;
+                    break;
+            }
             
             Update(data);
         }
@@ -122,7 +145,7 @@ namespace DashboardServer.Game
             data.AirTemperature = e.Physics.AirTemp;
             data.TrackTemperature = e.Physics.RoadTemp;
 
-            data.Delta = e.Physics.PerformanceMeter;
+            data.DeltaBestSelf = e.Physics.PerformanceMeter;
             
             Update(data);
         }
