@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,10 @@ namespace DashboardServer.Game
 
     public class ExchangeData
     {
+        // Internal.
+        private int _laps;
+        private Dictionary<int, double> _fuelPerLap = new Dictionary<int, double>();
+
         // Basic data.
         public int CarSpeed { get; internal set; }
         public int Gear { get; internal set; }
@@ -55,7 +60,45 @@ namespace DashboardServer.Game
 
         // Misc.
         public int NumberOfLaps { get; internal set; }
-        public int CompletedLaps { get; internal set; }
+        public int CompletedLaps {
+            get
+            {
+                return _laps;
+            }
+
+            set
+            {
+                // Reset fuel statistic if lap has not increased.
+                if (value == _laps)
+                {
+                    return;
+                }
+                else if (value < _laps)
+                {
+                    _fuelPerLap.Clear();
+                }
+
+                // Get current fuel.
+                if (_fuelPerLap.ContainsKey(value))
+                {
+                    Console.WriteLine("this should not happen!");
+                }
+
+                _fuelPerLap[value] = FuelLeft;
+
+                // Set value.
+                _laps = value;
+
+                // Calculate fuel per lap.
+                if (_fuelPerLap.Count >= 2)
+                {
+                    double tmpFuelPerLap = (_fuelPerLap.Values.Max() - _fuelPerLap.Values.Min()) / (_fuelPerLap.Count - 1);
+                    FuelPerLap = tmpFuelPerLap;
+                    FuelLapsLeftEstimate = FuelLeft / tmpFuelPerLap;
+                }
+            }
+        }
+
         public int Position { get; internal set; }
         public int NumCars { get; internal set; }
         public int PitLimiter { get; internal set; }
@@ -85,7 +128,7 @@ namespace DashboardServer.Game
         public double TrackTemperature { get; internal set; }
         public double OilTemperature { get; internal set; }
         public double WaterTemperature { get; internal set; }
-
+        
         public String ToJSON()
         {
             StringBuilder sb = new StringBuilder();

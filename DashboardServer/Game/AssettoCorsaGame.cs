@@ -60,7 +60,10 @@ namespace DashboardServer.Game
 
         private void GameStatusChanged(object sender, GameStatusEventArgs e)
         {
-            // Wrapper to avoid null pointer exception in the AC code. They forgot a null check for this event.
+            if (e.GameStatus == AC_STATUS.AC_OFF)
+            {
+                data = new ExchangeData();
+            }
         }
 
         private void GraphicsInfoUpdated(object sender, GraphicsEventArgs e)
