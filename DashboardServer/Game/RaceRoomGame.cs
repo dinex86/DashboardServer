@@ -52,22 +52,22 @@ namespace DashboardServer.Game
 
                 try
                 {
-                    byte[] buffer = null;
+                    Console.WriteLine("Mapping R3E shared memory...");
 
+                    byte[] buffer = null;
                     while (file == null)
                     {
-                        Console.WriteLine("Mapping R3E shared memory...");
-
                         try
                         {
                             file = MemoryMappedFile.OpenExisting(Constant.SharedMemoryName);
-                            Console.WriteLine("Memory mapped successfully.");
                             buffer = new Byte[Marshal.SizeOf(typeof(Shared))];
+
+                            Console.WriteLine("Memory mapped successfully.");
                         }
                         catch (FileNotFoundException)
                         {
                             // Game not ready, wait a little bit.
-                            Thread.Sleep(500);
+                            Thread.Sleep(1000);
                             continue;
                         }
                     }
