@@ -92,19 +92,16 @@ namespace DashboardServer.Game
                         Thread.Sleep(50);
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    if (file != null)
-                    {
-                        file.Dispose();
-                    }
-                    file = null;
+                    Console.WriteLine("Exception occured! " + e.Message);
                 }
                 finally
                 {
                     if (file != null)
                     {
                         file.Dispose();
+                        file = null;
                     }
                 }
             }
@@ -155,6 +152,37 @@ namespace DashboardServer.Game
             data.Position = shared.Position;
             data.NumCars = shared.NumCars;
             data.PitLimiter = shared.PitLimiter;
+            data.InPitLane = shared.InPitlane;
+
+            // Tire temps.
+            data.TireTempFrontLeft = Math.Round(shared.TireTemp.FrontLeft_Center, 1);
+            data.TireTempFrontRight = Math.Round(shared.TireTemp.FrontRight_Center, 1);
+            data.TireTempRearLeft = Math.Round(shared.TireTemp.RearLeft_Center, 1);
+            data.TireTempRearRight = Math.Round(shared.TireTemp.RearRight_Center, 1);
+
+            // Tire wear.
+            data.TireWearFrontLeft = Math.Round(shared.TireWear.FrontLeft, 1);
+            data.TireWearFrontRight = Math.Round(shared.TireWear.FrontRight, 1);
+            data.TireWearRearLeft = Math.Round(shared.TireWear.RearLeft, 1);
+            data.TireWearRearRight = Math.Round(shared.TireWear.RearRight, 1);
+
+            // Tire pressure.
+            data.TireWearFrontLeft = Math.Round(shared.TireWear.FrontLeft, 1);
+            data.TireWearFrontRight = Math.Round(shared.TireWear.FrontRight, 1);
+            data.TireWearRearLeft = Math.Round(shared.TireWear.RearLeft, 1);
+            data.TireWearRearRight = Math.Round(shared.TireWear.RearRight, 1);
+
+            // Tire pressure.
+            data.TirePressureFrontLeft = Math.Round(shared.TirePressure.FrontLeft, 1);
+            data.TirePressureFrontRight = Math.Round(shared.TirePressure.FrontRight, 1);
+            data.TirePressureRearLeft = Math.Round(shared.TirePressure.RearLeft, 1);
+            data.TirePressureRearRight = Math.Round(shared.TirePressure.RearRight, 1);
+
+            // Tire dirt.
+            data.TireDirtFrontLeft = Math.Round(shared.TireDirt.FrontLeft, 1);
+            data.TireDirtFrontRight = Math.Round(shared.TireDirt.FrontRight, 1);
+            data.TireDirtRearLeft = Math.Round(shared.TireDirt.RearLeft, 1);
+            data.TireDirtRearRight = Math.Round(shared.TireDirt.RearRight, 1);
 
             // Timing.
             data.LapTimeCurrentSelf = Math.Round(shared.LapTimeCurrentSelf, 3);

@@ -89,6 +89,7 @@ namespace DashboardServer.Game
         public int Position { get; internal set; }
         public int NumCars { get; internal set; }
         public int PitLimiter { get; internal set; }
+        public int InPitLane { get; internal set; }
         public double DistanceTravelled { get; internal set; }
 
         // Lap times.
@@ -116,6 +117,30 @@ namespace DashboardServer.Game
         public double OilTemperature { get; internal set; }
         public double WaterTemperature { get; internal set; }
 
+        // Tire temperatures.
+        public double TireTempFrontLeft { get; internal set; }
+        public double TireTempFrontRight { get; internal set; }
+        public double TireTempRearLeft { get; internal set; }
+        public double TireTempRearRight { get; internal set; }
+
+        // Tire wear.
+        public double TireWearFrontLeft { get; internal set; }
+        public double TireWearFrontRight { get; internal set; }
+        public double TireWearRearLeft { get; internal set; }
+        public double TireWearRearRight { get; internal set; }
+
+        // Tire pressure.
+        public double TirePressureFrontLeft { get; internal set; }
+        public double TirePressureFrontRight { get; internal set; }
+        public double TirePressureRearLeft { get; internal set; }
+        public double TirePressureRearRight { get; internal set; }
+
+        // Tire dirt.
+        public double TireDirtFrontLeft { get; internal set; }
+        public double TireDirtFrontRight { get; internal set; }
+        public double TireDirtRearLeft { get; internal set; }
+        public double TireDirtRearRight { get; internal set; }
+
         // Flag.
         public bool YellowFlagAhead { get; internal set; }
         public int CurrentFlag { get; internal set; }
@@ -128,6 +153,10 @@ namespace DashboardServer.Game
             if (_fuelLeftLastLap > -1 && FuelLeft > -1 && _fuelLeftLastLap > FuelLeft)
             {
                 FuelPerLap = Math.Round(_fuelLeftLastLap - FuelLeft, 3);
+            }
+            else
+            {
+                FuelPerLap = -1;
             }
 
             _fuelLeftLastLap = FuelLeft;

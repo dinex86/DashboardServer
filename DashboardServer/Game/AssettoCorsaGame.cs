@@ -69,11 +69,6 @@ namespace DashboardServer.Game
 
         private void GraphicsInfoUpdated(object sender, GraphicsEventArgs e)
         {
-            if (Update == null)
-            {
-                return;
-            }
-
             if (e.Graphics.CurrentSectorIndex < data.CurrentSector)
             {
                 data.TriggerFuelCalculation();
@@ -88,7 +83,9 @@ namespace DashboardServer.Game
             data.LapTimeBestSelf = Math.Round(e.Graphics.iBestTime / 1000.0, 3);
             data.SessionTimeRemaining = Math.Round(e.Graphics.SessionTimeLeft / 1000.0, 3);
             data.CurrentSector = e.Graphics.CurrentSectorIndex;
-            data.PitLimiter = e.Graphics.IsInPitLane;
+            data.PitLimiter = e.Graphics.IsInPitLane; // AC does not have a separate pit limiter, but there is an automatic one in the pit lane.
+            data.InPitLane = e.Graphics.IsInPitLane;
+
             // Flags.
             switch (e.Graphics.Flag)
             {
@@ -114,35 +111,26 @@ namespace DashboardServer.Game
                     data.CurrentFlag = (int)ExchangeData.FlagIndex.PENALTY;
                     break;
             }
-            
-            Update(data);
+
+            Update?.Invoke(data);
         }
 
         private void StaticInfoUpdated(object sender, StaticInfoEventArgs e)
         {
-            if (Update == null)
-            {
-                return;
-            }
-
             data.MaxEngineRpm = e.StaticInfo.MaxRpm;
             data.FuelMax = e.StaticInfo.MaxFuel;
             data.NumCars = e.StaticInfo.NumCars;
-            data.DrsEquipped = e.StaticInfo.HasDRS;
 
+            data.DrsEquipped = e.StaticInfo.HasDRS;
             data.ErsEquipped = e.StaticInfo.HasERS;
             data.KersEquipped = e.StaticInfo.HasKERS;
-
-            Update(data);
+            
+            Update?.Invoke(data);
         }
 
         private void PhysicsUpdated(object sender, PhysicsEventArgs e)
         {
-            if (Update == null)
-            {
-                return;
-            }
-                        
+            // Basic.
             data.CarSpeed = (int) Math.Floor(e.Physics.SpeedKmh);
             data.Gear = e.Physics.Gear - 1;
             data.EngineRpm = e.Physics.Rpms;
@@ -151,12 +139,38 @@ namespace DashboardServer.Game
             data.DrsEngaged = e.Physics.DrsEnabled;
             //data.PitLimiter = e.Physics.PitLimiterOn; // doesn't work, only 1 when speed = speed limit
 
+            // Tire temps.
+            data.TireTempFrontLeft = Math.Round(e.Physics.TyreCoreTemperature[0], 1);
+            data.TireTempFrontRight = Math.Round(e.Physics.TyreCoreTemperature[1], 1);
+            data.TireTempRearLeft = Math.Round(e.Physics.TyreCoreTemperature[2], 1);
+            data.TireTempRearRight = Math.Round(e.Physics.TyreCoreTemperature[3], 1);
+
+            // Tire wear.
+            data.TireWearFrontLeft = Math.Round(e.Physics.TyreWear[0], 1);
+            data.TireWearFrontRight = Math.Round(e.Physics.TyreWear[1], 1);
+            data.TireWearRearLeft = Math.Round(e.Physics.TyreWear[2], 1);
+            data.TireWearRearRight = Math.Round(e.Physics.TyreWear[3], 1);
+
+            // Tire pressure.
+            data.TirePressureFrontLeft = Math.Round(e.Physics.WheelsPressure[0], 1);
+            data.TirePressureFrontRight = Math.Round(e.Physics.WheelsPressure[1], 1);
+            data.TirePressureRearLeft = Math.Round(e.Physics.WheelsPressure[2], 1);
+            data.TirePressureRearRight = Math.Round(e.Physics.WheelsPressure[3], 1);
+
+            // Tire dirt.
+            data.TireDirtFrontLeft = Math.Round(e.Physics.TyreDirtyLevel[0], 1);
+            data.TireDirtFrontRight = Math.Round(e.Physics.TyreDirtyLevel[1], 1);
+            data.TireDirtRearLeft= Math.Round(e.Physics.TyreDirtyLevel[2], 1);
+            data.TireDirtRearRight = Math.Round(e.Physics.TyreDirtyLevel[3], 1);
+
+            // Temperatures.
             data.AirTemperature = e.Physics.AirTemp;
             data.TrackTemperature = e.Physics.RoadTemp;
 
+            // Delta.
             data.DeltaBestSelf = e.Physics.PerformanceMeter;
-            
-            Update(data);
+
+            Update?.Invoke(data);
         }
     }
 }
