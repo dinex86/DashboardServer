@@ -11,8 +11,7 @@ namespace DashboardServer.Game
     class AssettoCorsaGame : AbstractGame
     {
         public override event UpdateEventHandler Update;
-
-        private ExchangeData data = new ExchangeData();
+        
         private AssettoCorsa ac = new AssettoCorsa();
 
         public override bool IsRunning
@@ -56,6 +55,8 @@ namespace DashboardServer.Game
             ac.StaticInfoUpdated -= StaticInfoUpdated;
             ac.PhysicsUpdated -= PhysicsUpdated;
             ac.GraphicsUpdated -= GraphicsInfoUpdated;
+
+            data = new ExchangeData();
         }
 
         private void GameStatusChanged(object sender, GameStatusEventArgs e)
@@ -73,6 +74,11 @@ namespace DashboardServer.Game
                 return;
             }
 
+            if (e.Graphics.CurrentSectorIndex < data.CurrentSector)
+            {
+                data.TriggerFuelCalculation();
+            }
+
             data.CompletedLaps = e.Graphics.CompletedLaps;
             data.NumberOfLaps = e.Graphics.NumberOfLaps;
             data.Position = e.Graphics.Position;
@@ -82,10 +88,13 @@ namespace DashboardServer.Game
             data.LapTimeBestSelf = Math.Round(e.Graphics.iBestTime / 1000.0, 3);
             data.SessionTimeRemaining = Math.Round(e.Graphics.SessionTimeLeft / 1000.0, 3);
             data.CurrentSector = e.Graphics.CurrentSectorIndex;
-
+            data.PitLimiter = e.Graphics.IsInPitLane;
             // Flags.
             switch (e.Graphics.Flag)
             {
+                case AC_FLAG_TYPE.AC_YELLOW_FLAG:
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.YELLOW;
+                    break;
                 case AC_FLAG_TYPE.AC_BLACK_FLAG:
                     data.CurrentFlag = (int)ExchangeData.FlagIndex.BLACK;
                     break;
@@ -140,7 +149,7 @@ namespace DashboardServer.Game
             data.FuelLeft = e.Physics.Fuel;
             data.DrsAvailable = e.Physics.DrsAvailable;
             data.DrsEngaged = e.Physics.DrsEnabled;
-            data.PitLimiter = e.Physics.PitLimiterOn;
+            //data.PitLimiter = e.Physics.PitLimiterOn; // doesn't work, only 1 when speed = speed limit
 
             data.AirTemperature = e.Physics.AirTemp;
             data.TrackTemperature = e.Physics.RoadTemp;

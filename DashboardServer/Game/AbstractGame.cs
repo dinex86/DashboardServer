@@ -10,6 +10,8 @@ namespace DashboardServer.Game
 {
     abstract class AbstractGame
     {
+        protected ExchangeData data = new ExchangeData();
+
         public delegate void UpdateEventHandler(ExchangeData data);
         public abstract event UpdateEventHandler Update;
 
@@ -24,6 +26,7 @@ namespace DashboardServer.Game
     {
         public enum FlagIndex
         {
+            NO_FLAG = -1,
             GREEN = 0,
             YELLOW = 1,
             BLUE = 2,
@@ -35,8 +38,7 @@ namespace DashboardServer.Game
         }
 
         // Internal.
-        private int _laps;
-        private Dictionary<int, double> _fuelPerLap = new Dictionary<int, double>();
+        private double _fuelLeftLastLap = -1;
 
         // Basic data.
         public int CarSpeed { get; internal set; }
@@ -65,51 +67,24 @@ namespace DashboardServer.Game
         public double PushToPassWaitTimeLeft { get; internal set; }
 
         // Fuel.
-        public double FuelLapsLeftEstimate { get; internal set; }
+        public double FuelLapsLeftEstimate {
+            get
+            {
+                if (FuelPerLap > 0)
+                {
+                    return FuelLeft / FuelPerLap;
+                }
+
+                return -1;
+            }
+        }
         public double FuelLeft { get; internal set; }
         public double FuelPerLap { get; internal set; }
         public double FuelMax { get; internal set; }
 
         // Misc.
         public int NumberOfLaps { get; internal set; }
-        public int CompletedLaps {
-            get
-            {
-                return _laps;
-            }
-
-            set
-            {
-                // Reset fuel statistic if lap has not increased.
-                if (value == _laps)
-                {
-                    return;
-                }
-                else if (value < _laps)
-                {
-                    _fuelPerLap.Clear();
-                }
-
-                // Get current fuel.
-                if (_fuelPerLap.ContainsKey(value))
-                {
-                    Console.WriteLine("this should not happen!");
-                }
-
-                _fuelPerLap[value] = FuelLeft;
-
-                // Set value.
-                _laps = value;
-
-                // Calculate fuel per lap.
-                if (_fuelPerLap.Count >= 2)
-                {
-                    double tmpFuelPerLap = (_fuelPerLap.Values.Max() - _fuelPerLap.Values.Min()) / (_fuelPerLap.Count - 1);
-                    FuelPerLap = tmpFuelPerLap;
-                    FuelLapsLeftEstimate = FuelLeft / tmpFuelPerLap;
-                }
-            }
-        }
+        public int CompletedLaps { get; internal set; }
 
         public int Position { get; internal set; }
         public int NumCars { get; internal set; }
@@ -147,6 +122,16 @@ namespace DashboardServer.Game
         public int YellowSector1 { get; internal set; }
         public int YellowSector2 { get; internal set; }
         public int YellowSector3 { get; internal set; }
+
+        public void TriggerFuelCalculation()
+        {
+            if (_fuelLeftLastLap > -1 && FuelLeft > -1 && _fuelLeftLastLap > FuelLeft)
+            {
+                FuelPerLap = Math.Round(_fuelLeftLastLap - FuelLeft, 3);
+            }
+
+            _fuelLeftLastLap = FuelLeft;
+        }
 
         public String ToJSON()
         {

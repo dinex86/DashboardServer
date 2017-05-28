@@ -15,8 +15,7 @@ namespace DashboardServer.Game
     class RaceRoomGame : AbstractGame
     {
         public override event UpdateEventHandler Update;
-
-        private ExchangeData data = new ExchangeData();
+        
         private Thread updateThread = null;
 
         public override bool IsRunning
@@ -120,16 +119,24 @@ namespace DashboardServer.Game
                 //  RPM = Math.Round(Utilities.RpsToRpm(data.EngineRps));
             }
 
+            if (shared.TrackSector < data.CurrentSector)
+            {
+                data.TriggerFuelCalculation();
+            }
+
+            // General.
             data.CarSpeed = (int)Math.Round(Utilities.MpsToKph(shared.CarSpeed));
             data.Gear = shared.Gear;
             data.MaxEngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.MaxEngineRps));
             data.EngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.EngineRps));
 
+            // DRS.
             data.DrsAvailable = shared.Drs.Available;
             data.DrsEngaged = shared.Drs.Engaged;
             data.DrsEquipped = shared.Drs.Equipped;
             data.DrsNumActivationsLeft = shared.Drs.NumActivationsLeft;
 
+            // P2P.
             data.PushToPassEquipped = shared.PushToPass.Available;
             data.PushToPassAvailable = shared.PushToPass.Available;
             data.PushToPassEngaged = shared.PushToPass.Engaged;
@@ -137,14 +144,17 @@ namespace DashboardServer.Game
             data.PushToPassEngagedTimeLeft = shared.PushToPass.EngagedTimeLeft;
             data.PushToPassWaitTimeLeft = shared.PushToPass.WaitTimeLeft;
 
+            // Temps.
             data.OilTemperature = shared.EngineOilTemp;
             data.WaterTemperature = shared.EngineWaterTemp;
 
+            // Misc.
             data.FuelLeft = shared.FuelLeft;
             data.NumberOfLaps = (shared.SessionLengthFormat == 0) ? shared.NumberOfLaps : -1;
             data.CompletedLaps = shared.CompletedLaps;
             data.Position = shared.Position;
             data.NumCars = shared.NumCars;
+            data.PitLimiter = shared.PitLimiter;
 
             // Timing.
             data.LapTimeCurrentSelf = Math.Round(shared.LapTimeCurrentSelf, 3);
@@ -170,13 +180,21 @@ namespace DashboardServer.Game
             data.YellowSector2 = shared.SectorYellow.Sector2;
             data.YellowSector3 = shared.SectorYellow.Sector3;
 
-            if (shared.ExtendedFlags.Green == 1)
+            if (shared.NumPenalties > 0 || shared.ExtendedFlags2.YellowPositionsGained > 0)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.PENALTY;
+            }
+            else if (shared.ExtendedFlags.Green == 1)
             {
                 data.CurrentFlag = (int)ExchangeData.FlagIndex.GREEN;
             }
             else if (shared.Flags.Yellow == 1)
             {
                 data.CurrentFlag = (int)ExchangeData.FlagIndex.YELLOW;
+            }
+            else if (shared.ExtendedFlags2.White == 1)
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.WHITE;
             }
             else if (shared.Flags.Black == 1)
             {
@@ -194,49 +212,39 @@ namespace DashboardServer.Game
             {
                 data.CurrentFlag = (int)ExchangeData.FlagIndex.BLACK_WHITE;
             }
+            else
+            {
+                data.CurrentFlag = (int)ExchangeData.FlagIndex.NO_FLAG;
+            }
             
             Update?.Invoke(data);
         }
 
         private float CalcSectorDiff(Sectors<float> current, Sectors<float> last, Sectors<float> best)
         {
-            if (best.Sector1 == 0)
+            if (best.Sector1 == 0 || current.Sector1 == 0)
             {
                 return 0;
             }
 
-            Sectors<float> compare;
-            if (current.Sector1 == 0)
+            Sectors<float> compare = current;
+            
+            if (compare.Sector3 > 0)
             {
-                if (last.Sector1 == 0)
-                {
-                    return 0;
-                }
-
-                compare = last;
-            }
-            else
-            {
-                compare = current;
-            }
-
-            float delta = 0;
-            if (compare.Sector1 > 0)
-            {
-                delta += compare.Sector1 - best.Sector1;
+                return compare.Sector3 - best.Sector3;
             }
 
             if (compare.Sector2 > 0)
             {
-                delta += compare.Sector2 - best.Sector2;
+                return compare.Sector2 - best.Sector2;
             }
 
-            if (compare.Sector3 > 0)
+            if (compare.Sector1 > 0)
             {
-                delta += compare.Sector2 - best.Sector2;
+                return compare.Sector1 - best.Sector1;
             }
 
-            return delta;
+            return 0;
         }
     }
 }
