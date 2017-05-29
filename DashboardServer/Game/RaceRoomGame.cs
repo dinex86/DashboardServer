@@ -161,17 +161,11 @@ namespace DashboardServer.Game
             data.TireTempRearRight = Math.Round(shared.TireTemp.RearRight_Center, 1);
 
             // Tire wear.
-            data.TireWearFrontLeft = Math.Round(shared.TireWear.FrontLeft, 1);
-            data.TireWearFrontRight = Math.Round(shared.TireWear.FrontRight, 1);
-            data.TireWearRearLeft = Math.Round(shared.TireWear.RearLeft, 1);
-            data.TireWearRearRight = Math.Round(shared.TireWear.RearRight, 1);
-
-            // Tire pressure.
-            data.TireWearFrontLeft = Math.Round(shared.TireWear.FrontLeft, 1);
-            data.TireWearFrontRight = Math.Round(shared.TireWear.FrontRight, 1);
-            data.TireWearRearLeft = Math.Round(shared.TireWear.RearLeft, 1);
-            data.TireWearRearRight = Math.Round(shared.TireWear.RearRight, 1);
-
+            data.TireWearFrontLeft = Math.Round(shared.TireWear.FrontLeft, 3);
+            data.TireWearFrontRight = Math.Round(shared.TireWear.FrontRight, 3);
+            data.TireWearRearLeft = Math.Round(shared.TireWear.RearLeft, 3);
+            data.TireWearRearRight = Math.Round(shared.TireWear.RearRight, 3);
+            
             // Tire pressure.
             data.TirePressureFrontLeft = Math.Round(shared.TirePressure.FrontLeft, 1);
             data.TirePressureFrontRight = Math.Round(shared.TirePressure.FrontRight, 1);

@@ -49,6 +49,7 @@ namespace DashboardServer
                 // Game still running?
                 if (runningGame != null && !runningGame.IsRunning)
                 {
+                    DataUpdated(new ExchangeData()); // Send empty data.
                     runningGame.Stop();
                     runningGame = null;
                 }

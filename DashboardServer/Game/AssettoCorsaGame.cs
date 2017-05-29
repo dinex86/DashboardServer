@@ -146,10 +146,10 @@ namespace DashboardServer.Game
             data.TireTempRearRight = Math.Round(e.Physics.TyreCoreTemperature[3], 1);
 
             // Tire wear.
-            data.TireWearFrontLeft = Math.Round(e.Physics.TyreWear[0], 1);
-            data.TireWearFrontRight = Math.Round(e.Physics.TyreWear[1], 1);
-            data.TireWearRearLeft = Math.Round(e.Physics.TyreWear[2], 1);
-            data.TireWearRearRight = Math.Round(e.Physics.TyreWear[3], 1);
+            data.TireWearFrontLeft = ConvertTireWear(e.Physics.TyreWear[0]);
+            data.TireWearFrontRight = ConvertTireWear(e.Physics.TyreWear[1]);
+            data.TireWearRearLeft = ConvertTireWear(e.Physics.TyreWear[2]);
+            data.TireWearRearRight = ConvertTireWear(e.Physics.TyreWear[3]);
 
             // Tire pressure.
             data.TirePressureFrontLeft = Math.Round(e.Physics.WheelsPressure[0], 1);
@@ -171,6 +171,17 @@ namespace DashboardServer.Game
             data.DeltaBestSelf = e.Physics.PerformanceMeter;
 
             Update?.Invoke(data);
+        }
+
+        private double ConvertTireWear(float wear)
+        {
+            double baseValue = 93;
+            if (wear < baseValue)
+            {
+                return 0;
+            }
+
+            return Math.Round(((wear - baseValue) / (100 - baseValue)) / 100, 3);
         }
     }
 }
