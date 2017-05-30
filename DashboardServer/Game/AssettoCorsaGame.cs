@@ -157,11 +157,11 @@ namespace DashboardServer.Game
             data.TirePressureRearLeft = Math.Round(e.Physics.WheelsPressure[2], 1);
             data.TirePressureRearRight = Math.Round(e.Physics.WheelsPressure[3], 1);
 
-            // Tire dirt.
-            data.TireDirtFrontLeft = Math.Round(e.Physics.TyreDirtyLevel[0], 1);
-            data.TireDirtFrontRight = Math.Round(e.Physics.TyreDirtyLevel[1], 1);
-            data.TireDirtRearLeft= Math.Round(e.Physics.TyreDirtyLevel[2], 1);
-            data.TireDirtRearRight = Math.Round(e.Physics.TyreDirtyLevel[3], 1);
+            // Tire dirt. Max value in game is 5.0.
+            data.TireDirtFrontLeft = Math.Round(e.Physics.TyreDirtyLevel[0] / 5, 3);
+            data.TireDirtFrontRight = Math.Round(e.Physics.TyreDirtyLevel[1] / 5, 3);
+            data.TireDirtRearLeft= Math.Round(e.Physics.TyreDirtyLevel[2] / 5, 3);
+            data.TireDirtRearRight = Math.Round(e.Physics.TyreDirtyLevel[3] / 5, 3);
 
             // Temperatures.
             data.AirTemperature = e.Physics.AirTemp;
@@ -181,7 +181,7 @@ namespace DashboardServer.Game
                 return 0;
             }
 
-            return Math.Round(((wear - baseValue) / (100 - baseValue)) / 100, 3);
+            return Math.Round(((wear - baseValue) / (100 - baseValue)), 3);
         }
     }
 }
