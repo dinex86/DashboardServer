@@ -167,10 +167,10 @@ namespace DashboardServer.Game
             data.TireWearRearRight = Math.Round(shared.TireWear.RearRight, 3);
             
             // Tire pressure.
-            data.TirePressureFrontLeft = Math.Round(shared.TirePressure.FrontLeft, 1);
-            data.TirePressureFrontRight = Math.Round(shared.TirePressure.FrontRight, 1);
-            data.TirePressureRearLeft = Math.Round(shared.TirePressure.RearLeft, 1);
-            data.TirePressureRearRight = Math.Round(shared.TirePressure.RearRight, 1);
+            data.TirePressureFrontLeft = Math.Round(ConvertPressureToPsi(shared.TirePressure.FrontLeft), 1);
+            data.TirePressureFrontRight = Math.Round(ConvertPressureToPsi(shared.TirePressure.FrontRight), 1);
+            data.TirePressureRearLeft = Math.Round(ConvertPressureToPsi(shared.TirePressure.RearLeft), 1);
+            data.TirePressureRearRight = Math.Round(ConvertPressureToPsi(shared.TirePressure.RearRight), 1);
 
             // Tire dirt.
             data.TireDirtFrontLeft = Math.Round(shared.TireDirt.FrontLeft, 1);
@@ -248,8 +248,14 @@ namespace DashboardServer.Game
             {
                 return 0;
             }
-
+            
+            // When a new fastest lap was driven the 'current' and 'best' sectors times are equal.
+            //Use the previous lap to show the delta when crossing the start/finish line.
             Sectors<float> compare = current;
+            if (compare.Sector1 == best.Sector1 && compare.Sector2 == best.Sector2 && compare.Sector3 == best.Sector3)
+            {
+                compare = last;
+            }
             
             if (compare.Sector3 > 0)
             {
@@ -267,6 +273,16 @@ namespace DashboardServer.Game
             }
 
             return 0;
+        }
+            
+        private double ConvertPressureToPsi(float pressure)
+        {
+            if (pressure < 0) 
+            {
+                return pressure;
+            }
+            
+            return pressure / 6.894757;
         }
     }
 }
