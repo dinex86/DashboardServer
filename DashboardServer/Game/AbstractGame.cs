@@ -10,9 +10,19 @@ namespace DashboardServer.Game
 {
     abstract class AbstractGame
     {
+        private DateTime _epoch = new DateTime(1970, 1, 1);
+
         protected ExchangeData data = new ExchangeData();
+        protected long Now
+        {
+            get
+            {
+                return (long)DateTime.UtcNow.Subtract(_epoch).TotalMilliseconds;
+            }
+        }
 
         public delegate void UpdateEventHandler(ExchangeData data);
+
         public abstract event UpdateEventHandler Update;
 
         public abstract bool IsRunning { get; }
@@ -24,6 +34,12 @@ namespace DashboardServer.Game
 
     public class ExchangeData
     {
+        public ExchangeData()
+        {
+            LastTimeInPit = -1;
+            LastTimeOnTrack = -1;
+        }
+
         public enum FlagIndex
         {
             NO_FLAG = -1,
@@ -35,6 +51,22 @@ namespace DashboardServer.Game
             WHITE = 5,
             CHECKERED = 6,
             PENALTY = 7
+        }
+
+        public enum RaceFormatIndex
+        {
+            NOT_AVAILABLE = -1,
+            TIME = 0,
+            LAP = 1,
+            TIME_AND_EXTRA_LAP = 2
+        }
+
+        public enum SessionIndex
+        {
+            UNKNOWN = -1,
+            PRACTICE = 0,
+            QUALIFY = 1,
+            RACE = 2
         }
 
         // Internal.
@@ -78,6 +110,20 @@ namespace DashboardServer.Game
                 return -1;
             }
         }
+
+        public double FuelRequiredUntilSessionEnd
+        {
+            get
+            {
+                if (FuelPerLap > 0)
+                {
+                    return FuelLeft / FuelPerLap;
+                }
+
+                return -1;
+            }
+        }
+
         public double FuelLeft { get; internal set; }
         public double FuelPerLap { get; internal set; }
         public double FuelMax { get; internal set; }
@@ -85,6 +131,9 @@ namespace DashboardServer.Game
         // Misc.
         public int NumberOfLaps { get; internal set; }
         public int CompletedLaps { get; internal set; }
+        public int RaceFormat { get; internal set; }
+        public int Session { get; internal set; }
+        public int SessionIteration { get; internal set; }
 
         public int Position { get; internal set; }
         public int NumCars { get; internal set; }
@@ -148,6 +197,10 @@ namespace DashboardServer.Game
         public int YellowSector2 { get; internal set; }
         public int YellowSector3 { get; internal set; }
 
+        // Timestamps.
+        public long LastTimeInPit { get; internal set; }
+        public long LastTimeOnTrack { get; internal set; }
+
         public void TriggerFuelCalculation()
         {
             if (_fuelLeftLastLap > -1 && FuelLeft > -1 && _fuelLeftLastLap > FuelLeft)
@@ -189,6 +242,10 @@ namespace DashboardServer.Game
                 else if (value is bool)
                 {
                     niceValue = (bool)value ? "true" : "false";
+                }
+                else if (value is long)
+                {
+                    niceValue = ((long)value).ToString("0", CultureInfo.CreateSpecificCulture("EN-us"));
                 }
 
                 sb.AppendFormat("\"{0}\":{1}", prop.Name, niceValue);

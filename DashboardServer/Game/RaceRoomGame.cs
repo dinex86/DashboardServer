@@ -111,12 +111,37 @@ namespace DashboardServer.Game
 
         private void UpdateExchangeData(Shared shared)
         {
-            if (shared.EngineRps > -1.0f)
+            // Session info.
+            switch (shared.SessionLengthFormat)
             {
-                //  RPM = Math.Round(Utilities.RpsToRpm(data.EngineRps));
+                case 0:
+                    data.RaceFormat = (int)ExchangeData.RaceFormatIndex.LAP;
+                    break;
+                case 1:
+                    data.RaceFormat = (int)ExchangeData.RaceFormatIndex.TIME;
+                    break;
+                case 2:
+                    data.RaceFormat = (int)ExchangeData.RaceFormatIndex.TIME_AND_EXTRA_LAP;
+                    break;
             }
 
-            if (shared.TrackSector < data.CurrentSector)
+            switch (shared.SessionPhase)
+            {
+                case 0:
+                    data.Session = (int)ExchangeData.SessionIndex.PRACTICE;
+                    break;
+                case 1:
+                    data.Session = (int)ExchangeData.SessionIndex.QUALIFY;
+                    break;
+                case 2:
+                    data.Session = (int)ExchangeData.SessionIndex.RACE;
+                    break;
+            }
+
+            data.SessionIteration = shared.SessionIteration;
+
+            // ControlType 0 = Player
+            if (shared.TrackSector < data.CurrentSector && shared.ControlType == 0)
             {
                 data.TriggerFuelCalculation();
             }
@@ -195,7 +220,7 @@ namespace DashboardServer.Game
             data.DeltaBestSession = CalcSectorDiff(shared.SectorTimesCurrentSelf, shared.SectorTimesPreviousSelf, shared.SectorTimesSessionBestLap);
 
             data.CurrentSector = shared.TrackSector;
-
+            
             // Flags.
             data.YellowFlagAhead = shared.ClosestYellowDistanceIntoTrack > 0 && shared.ClosestYellowDistanceIntoTrack < 1000;
             data.YellowSector1 = shared.SectorYellow.Sector1;
@@ -238,7 +263,27 @@ namespace DashboardServer.Game
             {
                 data.CurrentFlag = (int)ExchangeData.FlagIndex.NO_FLAG;
             }
-            
+
+            // Timestamps.
+            if (shared.InPitlane == 1)
+            {
+                data.LastTimeInPit = Now;
+
+                if (data.LastTimeOnTrack <= 0)
+                {
+                    data.LastTimeOnTrack = Now;
+                }
+            }
+            else
+            {
+                data.LastTimeOnTrack = Now;
+
+                if (data.LastTimeInPit <= 0)
+                {
+                    data.LastTimeInPit = Now;
+                }
+            }
+
             Update?.Invoke(data);
         }
 

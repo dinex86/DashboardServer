@@ -39,6 +39,11 @@ namespace DashboardServer.Game
         {
             Console.WriteLine("Starting collector for Assetto Corsa!");
 
+            // Initial read.
+            UpdateExchangeData(ac.ReadStaticInfo());
+            UpdateExchangeData(ac.ReadGraphics());
+            UpdateExchangeData(ac.ReadPhysics());
+
             // Add the listeners.
             ac.GameStatusChanged += GameStatusChanged;
             ac.StaticInfoUpdated += StaticInfoUpdated;
@@ -69,106 +74,172 @@ namespace DashboardServer.Game
 
         private void GraphicsInfoUpdated(object sender, GraphicsEventArgs e)
         {
-            if (e.Graphics.CurrentSectorIndex < data.CurrentSector)
-            {
-                data.TriggerFuelCalculation();
-            }
-
-            data.CompletedLaps = e.Graphics.CompletedLaps;
-            data.NumberOfLaps = e.Graphics.NumberOfLaps;
-            data.Position = e.Graphics.Position;
-
-            data.LapTimeCurrentSelf = Math.Round(e.Graphics.iCurrentTime / 1000.0, 3);
-            data.LapTimePreviousSelf = Math.Round(e.Graphics.iLastTime / 1000.0, 3);
-            data.LapTimeBestSelf = Math.Round(e.Graphics.iBestTime / 1000.0, 3);
-            data.SessionTimeRemaining = Math.Round(e.Graphics.SessionTimeLeft / 1000.0, 3);
-            data.CurrentSector = e.Graphics.CurrentSectorIndex;
-            data.PitLimiter = e.Graphics.IsInPitLane; // AC does not have a separate pit limiter, but there is an automatic one in the pit lane.
-            data.InPitLane = e.Graphics.IsInPitLane;
-
-            // Flags.
-            switch (e.Graphics.Flag)
-            {
-                case AC_FLAG_TYPE.AC_YELLOW_FLAG:
-                    data.CurrentFlag = (int)ExchangeData.FlagIndex.YELLOW;
-                    break;
-                case AC_FLAG_TYPE.AC_BLACK_FLAG:
-                    data.CurrentFlag = (int)ExchangeData.FlagIndex.BLACK;
-                    break;
-                case AC_FLAG_TYPE.AC_BLUE_FLAG:
-                    data.CurrentFlag = (int)ExchangeData.FlagIndex.BLUE;
-                    break;
-                case AC_FLAG_TYPE.AC_CHECKERED_FLAG:
-                    data.CurrentFlag = (int)ExchangeData.FlagIndex.CHECKERED;
-                    break;
-                case AC_FLAG_TYPE.AC_NO_FLAG:
-                    data.CurrentFlag = (int)ExchangeData.FlagIndex.GREEN;
-                    break;
-                case AC_FLAG_TYPE.AC_WHITE_FLAG:
-                    data.CurrentFlag = (int)ExchangeData.FlagIndex.WHITE;
-                    break;
-                case AC_FLAG_TYPE.AC_PENALTY_FLAG:
-                    data.CurrentFlag = (int)ExchangeData.FlagIndex.PENALTY;
-                    break;
-            }
-
-            Update?.Invoke(data);
+            UpdateExchangeData(e.Graphics);
         }
-
+        
         private void StaticInfoUpdated(object sender, StaticInfoEventArgs e)
         {
-            data.MaxEngineRpm = e.StaticInfo.MaxRpm;
-            data.FuelMax = e.StaticInfo.MaxFuel;
-            data.NumCars = e.StaticInfo.NumCars;
-
-            data.DrsEquipped = e.StaticInfo.HasDRS;
-            data.ErsEquipped = e.StaticInfo.HasERS;
-            data.KersEquipped = e.StaticInfo.HasKERS;
-            
-            Update?.Invoke(data);
+            UpdateExchangeData(e.StaticInfo);
         }
 
         private void PhysicsUpdated(object sender, PhysicsEventArgs e)
         {
+            UpdateExchangeData(e.Physics);
+        }
+
+        private void UpdateExchangeData(Graphics graphics)
+        {
+            if (graphics.CurrentSectorIndex < data.CurrentSector)
+            {
+                data.TriggerFuelCalculation();
+            }
+
+            data.CompletedLaps = graphics.CompletedLaps;
+            data.NumberOfLaps = graphics.NumberOfLaps;
+            data.Position = graphics.Position;
+
+            data.LapTimeCurrentSelf = Math.Round(graphics.iCurrentTime / 1000.0, 3);
+            data.LapTimePreviousSelf = Math.Round(graphics.iLastTime / 1000.0, 3);
+            data.LapTimeBestSelf = Math.Round(graphics.iBestTime / 1000.0, 3);
+
+            data.SessionTimeRemaining = Math.Round(graphics.SessionTimeLeft / 1000.0, 3);
+
+            switch (graphics.Session)
+            {
+                case AC_SESSION_TYPE.AC_PRACTICE:
+                    data.Session = (int)ExchangeData.SessionIndex.PRACTICE;
+                    break;
+                case AC_SESSION_TYPE.AC_QUALIFY:
+                    data.Session = (int)ExchangeData.SessionIndex.QUALIFY;
+                    break;
+                case AC_SESSION_TYPE.AC_RACE:
+                    data.Session = (int)ExchangeData.SessionIndex.RACE;
+                    break;
+                default:
+                    data.Session = (int)ExchangeData.SessionIndex.UNKNOWN;
+                    break;
+            }
+            
+            data.CurrentSector = graphics.CurrentSectorIndex;
+            data.PitLimiter = graphics.IsInPitLane; // AC does not have a separate pit limiter, but there is an automatic one in the pit lane.
+            data.InPitLane = graphics.IsInPitLane;
+
+            // Timestamps.
+            if (graphics.IsInPitLane == 1)
+            {
+                data.LastTimeInPit = Now;
+
+                if (data.LastTimeOnTrack <= 0)
+                {
+                    data.LastTimeOnTrack = Now;
+                }
+            }
+            else
+            {
+                data.LastTimeOnTrack = Now;
+
+                if (data.LastTimeInPit <= 0)
+                {
+                    data.LastTimeInPit = Now;
+                }
+            }
+
+            // Flags.
+            switch (graphics.Flag)
+            {
+                case AC_FLAG_TYPE.AC_YELLOW_FLAG:
+                    data.CurrentFlag = (int) ExchangeData.FlagIndex.YELLOW;
+                    break;
+                case AC_FLAG_TYPE.AC_BLACK_FLAG:
+                    data.CurrentFlag = (int) ExchangeData.FlagIndex.BLACK;
+                    break;
+                case AC_FLAG_TYPE.AC_BLUE_FLAG:
+                    data.CurrentFlag = (int) ExchangeData.FlagIndex.BLUE;
+                    break;
+                case AC_FLAG_TYPE.AC_CHECKERED_FLAG:
+                    data.CurrentFlag = (int) ExchangeData.FlagIndex.CHECKERED;
+                    break;
+                case AC_FLAG_TYPE.AC_NO_FLAG:
+                    data.CurrentFlag = (int) ExchangeData.FlagIndex.GREEN;
+                    break;
+                case AC_FLAG_TYPE.AC_WHITE_FLAG:
+                    data.CurrentFlag = (int) ExchangeData.FlagIndex.WHITE;
+                    break;
+                case AC_FLAG_TYPE.AC_PENALTY_FLAG:
+                    data.CurrentFlag = (int) ExchangeData.FlagIndex.PENALTY;
+                    break;
+            }
+
+            Update?.Invoke(data);
+        }
+
+        private void UpdateExchangeData(StaticInfo staticInfo)
+        {
+            if (staticInfo.IsTimedRace > 0 && staticInfo.HasExtraLap > 0)
+            {
+                data.RaceFormat = (int)ExchangeData.RaceFormatIndex.TIME_AND_EXTRA_LAP;
+            }
+            else if (staticInfo.IsTimedRace > 0)
+            {
+                data.RaceFormat = (int)ExchangeData.RaceFormatIndex.TIME;
+            }
+            else
+            {
+                data.RaceFormat = (int)ExchangeData.RaceFormatIndex.LAP;
+            }
+
+            data.MaxEngineRpm = staticInfo.MaxRpm;
+            data.FuelMax = staticInfo.MaxFuel;
+            data.NumCars = staticInfo.NumCars;
+
+            data.DrsEquipped = staticInfo.HasDRS;
+            data.ErsEquipped = staticInfo.HasERS;
+            data.KersEquipped = staticInfo.HasKERS;
+
+            Update?.Invoke(data);
+        }
+
+        private void UpdateExchangeData(Physics physics)
+        {
             // Basic.
-            data.CarSpeed = (int) Math.Floor(e.Physics.SpeedKmh);
-            data.Gear = e.Physics.Gear - 1;
-            data.EngineRpm = e.Physics.Rpms;
-            data.FuelLeft = e.Physics.Fuel;
-            data.DrsAvailable = e.Physics.DrsAvailable;
-            data.DrsEngaged = e.Physics.DrsEnabled;
-            //data.PitLimiter = e.Physics.PitLimiterOn; // doesn't work, only 1 when speed = speed limit
+            data.CarSpeed = (int) Math.Floor(physics.SpeedKmh);
+            data.Gear = physics.Gear - 1;
+            data.EngineRpm = physics.Rpms;
+            data.FuelLeft = physics.Fuel;
+            data.DrsAvailable = physics.DrsAvailable;
+            data.DrsEngaged = physics.DrsEnabled;
+            //data.PitLimiter = physics.PitLimiterOn; // doesn't work, only 1 when speed = speed limit
 
             // Tire temps.
-            data.TireTempFrontLeft = Math.Round(e.Physics.TyreCoreTemperature[0], 1);
-            data.TireTempFrontRight = Math.Round(e.Physics.TyreCoreTemperature[1], 1);
-            data.TireTempRearLeft = Math.Round(e.Physics.TyreCoreTemperature[2], 1);
-            data.TireTempRearRight = Math.Round(e.Physics.TyreCoreTemperature[3], 1);
+            data.TireTempFrontLeft = Math.Round(physics.TyreCoreTemperature[0], 1);
+            data.TireTempFrontRight = Math.Round(physics.TyreCoreTemperature[1], 1);
+            data.TireTempRearLeft = Math.Round(physics.TyreCoreTemperature[2], 1);
+            data.TireTempRearRight = Math.Round(physics.TyreCoreTemperature[3], 1);
 
             // Tire wear.
-            data.TireWearFrontLeft = ConvertTireWear(e.Physics.TyreWear[0]);
-            data.TireWearFrontRight = ConvertTireWear(e.Physics.TyreWear[1]);
-            data.TireWearRearLeft = ConvertTireWear(e.Physics.TyreWear[2]);
-            data.TireWearRearRight = ConvertTireWear(e.Physics.TyreWear[3]);
+            data.TireWearFrontLeft = ConvertTireWear(physics.TyreWear[0]);
+            data.TireWearFrontRight = ConvertTireWear(physics.TyreWear[1]);
+            data.TireWearRearLeft = ConvertTireWear(physics.TyreWear[2]);
+            data.TireWearRearRight = ConvertTireWear(physics.TyreWear[3]);
 
             // Tire pressure.
-            data.TirePressureFrontLeft = Math.Round(e.Physics.WheelsPressure[0], 1);
-            data.TirePressureFrontRight = Math.Round(e.Physics.WheelsPressure[1], 1);
-            data.TirePressureRearLeft = Math.Round(e.Physics.WheelsPressure[2], 1);
-            data.TirePressureRearRight = Math.Round(e.Physics.WheelsPressure[3], 1);
+            data.TirePressureFrontLeft = Math.Round(physics.WheelsPressure[0], 1);
+            data.TirePressureFrontRight = Math.Round(physics.WheelsPressure[1], 1);
+            data.TirePressureRearLeft = Math.Round(physics.WheelsPressure[2], 1);
+            data.TirePressureRearRight = Math.Round(physics.WheelsPressure[3], 1);
 
             // Tire dirt. Max value in game is 5.0.
-            data.TireDirtFrontLeft = Math.Round(e.Physics.TyreDirtyLevel[0] / 5, 3);
-            data.TireDirtFrontRight = Math.Round(e.Physics.TyreDirtyLevel[1] / 5, 3);
-            data.TireDirtRearLeft= Math.Round(e.Physics.TyreDirtyLevel[2] / 5, 3);
-            data.TireDirtRearRight = Math.Round(e.Physics.TyreDirtyLevel[3] / 5, 3);
+            data.TireDirtFrontLeft = Math.Round(physics.TyreDirtyLevel[0] / 5, 3);
+            data.TireDirtFrontRight = Math.Round(physics.TyreDirtyLevel[1] / 5, 3);
+            data.TireDirtRearLeft= Math.Round(physics.TyreDirtyLevel[2] / 5, 3);
+            data.TireDirtRearRight = Math.Round(physics.TyreDirtyLevel[3] / 5, 3);
 
             // Temperatures.
-            data.AirTemperature = e.Physics.AirTemp;
-            data.TrackTemperature = e.Physics.RoadTemp;
+            data.AirTemperature = physics.AirTemp;
+            data.TrackTemperature = physics.RoadTemp;
 
             // Delta.
-            data.DeltaBestSelf = e.Physics.PerformanceMeter;
+            data.DeltaBestSelf = physics.PerformanceMeter;
 
             Update?.Invoke(data);
         }
