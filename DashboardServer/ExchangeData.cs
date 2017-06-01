@@ -77,25 +77,38 @@ namespace DashboardServer
 			{
 				if (FuelPerLap > 0)
 				{
-					return LapsUntilSessionEnd * FuelPerLap;
+					return FuelLeft / FuelPerLap;
 				}
 
 				return -1;
 			}
 		}
 
-		public double LapsUntilSessionEnd
+        public double FuelRequiredUntilSessionEnd
         {
             get
             {
-                double lapFraction = 0.0;
-                double lapsToGo = 0.0;
-                if (Session == (int)SessionIndex.PRACTICE || Session == (int)SessionIndex.QUALIFY ||
-                    (Session == (int)SessionIndex.RACE && (RaceFormat == (int)RaceFormatIndex.TIME || RaceFormat == (int)RaceFormatIndex.TIME_AND_EXTRA_LAP)
-                    ))
+                if (FuelPerLap > 0)
                 {
-                    double bestLapWithBuffer = LapTimeBestSelf * 1.03; // Add 3% to lap time. It's a bit more secure.
-                    double drivenInLap = LapTimeCurrentSelf / (bestLapWithBuffer + DeltaBestSelf);
+                    return LapsUntilSessionEnd * FuelPerLap;
+                }
+
+                return -1;
+            }
+        }
+
+        public double LapsUntilSessionEnd
+        {
+            get
+            {
+                double bestLapWithBuffer = LapTimeBestSelf * 1.03; // Add 3% to lap time. It's a bit more secure.
+                double drivenInLap = LapTimeCurrentSelf / (bestLapWithBuffer + DeltaBestSelf);
+                
+                double lapsToGo = 0;
+                if (bestLapWithBuffer > 0 && (Session == (int)SessionIndex.PRACTICE || Session == (int)SessionIndex.QUALIFY ||
+                    (Session == (int)SessionIndex.RACE && (RaceFormat == (int)RaceFormatIndex.TIME || RaceFormat == (int)RaceFormatIndex.TIME_AND_EXTRA_LAP)
+                    )))
+                {
                     double remainingInLap = 1.0 - drivenInLap;
                     double remainingSecInLap = drivenInLap * bestLapWithBuffer;
                     double remainingSessionTimeAtFinishLine = remainingSecInLap < SessionTimeRemaining ? SessionTimeRemaining - remainingSecInLap : 0;
@@ -112,7 +125,7 @@ namespace DashboardServer
                     }
                     else if (RaceFormat == (int)RaceFormatIndex.LAP)
                     {
-                        lapsToGo = (NumberOfLaps - CompletedLaps) - lapFraction;
+                        lapsToGo = (NumberOfLaps - CompletedLaps) - drivenInLap;
                     }
                     else
                     {
@@ -120,7 +133,12 @@ namespace DashboardServer
                     }
                 }
 
-                return lapsToGo;
+                if (lapsToGo >= 0)
+                {
+                    return lapsToGo;
+                }
+
+                return -1;
             }
         }
 

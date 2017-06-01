@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Collector.cs" />
     <Compile Include="DashboardServer.cs" />
+    <Compile Include="ExchangeData.cs" />
     <Compile Include="Game\AssettoCorsaGame.cs" />
     <Compile Include="Game\AbstractGame.cs" />
     <Compile Include="Game\RaceRoomGame.cs" />
