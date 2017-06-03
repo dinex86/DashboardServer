@@ -215,8 +215,13 @@ namespace DashboardServer
 		public int YellowSector2 { get; internal set; }
 		public int YellowSector3 { get; internal set; }
 
-		// Timestamps.
-		public long LastTimeInPit { get; internal set; }
+        // Damage.
+        public float DamageAerodynamics { get; internal set; }
+        public float DamageEngine { get; internal set; }
+        public float DamageTransmission { get; internal set; }
+
+        // Timestamps.
+        public long LastTimeInPit { get; internal set; }
 		public long LastTimeOnTrack { get; internal set; }
 
 		public void TriggerFuelCalculation()

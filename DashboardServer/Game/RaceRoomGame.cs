@@ -125,7 +125,7 @@ namespace DashboardServer.Game
                     break;
             }
 
-            switch (shared.SessionPhase)
+            switch (shared.SessionType)
             {
                 case 0:
                     data.Session = (int)ExchangeData.SessionIndex.PRACTICE;
@@ -141,7 +141,7 @@ namespace DashboardServer.Game
             data.SessionIteration = shared.SessionIteration;
 
             // ControlType 0 = Player
-            if (shared.TrackSector < data.CurrentSector && shared.ControlType == 0)
+            if (((shared.LapTimeCurrentSelf >= 0 && data.LapTimeCurrentSelf < 0) || (shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf && shared.TrackSector != data.CurrentSector)) && shared.ControlType == 0)
             {
                 data.TriggerFuelCalculation();
             }
@@ -179,6 +179,11 @@ namespace DashboardServer.Game
             data.PitLimiter = shared.PitLimiter;
             data.InPitLane = shared.InPitlane;
 
+            // Damage.
+            data.DamageAerodynamics = shared.CarDamage.Aerodynamics;
+            data.DamageEngine = shared.CarDamage.Engine;
+            data.DamageTransmission = shared.CarDamage.Transmission;
+
             // Tire temps.
             data.TireTempFrontLeft = Math.Round(shared.TireTemp.FrontLeft_Center, 1);
             data.TireTempFrontRight = Math.Round(shared.TireTemp.FrontRight_Center, 1);
@@ -212,10 +217,50 @@ namespace DashboardServer.Game
             data.SessionTimeRemaining = Math.Round(shared.SessionTimeRemaining, 3);
             data.LapTimeDeltaLeader = Math.Round(shared.LapTimeDeltaLeader, 3);
             data.LapTimeDeltaLeaderClass = Math.Round(shared.LapTimeDeltaLeaderClass, 3);
-            data.TimeDeltaBehind = Math.Round(shared.TimeDeltaBehind, 3);
-            data.TimeDeltaFront = Math.Round(shared.TimeDeltaFront, 3);
 
             // Delta.
+            if (data.Session == (int)ExchangeData.SessionIndex.RACE)
+            {
+                data.TimeDeltaBehind = Math.Round(shared.TimeDeltaBehind, 3);
+                data.TimeDeltaFront = Math.Round(shared.TimeDeltaFront, 3);
+            }
+            else
+            {
+                // Get from leaderboard.
+                bool foundFront = false;
+                bool foundBehind = false;
+                for (int i = 0; i < shared.DriverData.Length; i++)
+                {
+                    DriverData otherDriver = shared.DriverData[i];
+                    if (!foundFront && otherDriver.Place == data.Position - 1)
+                    {
+                        data.TimeDeltaFront = CalcSectorDiff(shared.SectorTimesBestSelf, otherDriver.SectorTimeBestSelf);
+                        foundFront = true;
+                    }
+
+                    if (!foundBehind && otherDriver.Place == data.Position + 1)
+                    {
+                        data.TimeDeltaBehind = CalcSectorDiff(otherDriver.SectorTimeBestSelf, shared.SectorTimesBestSelf);
+                        foundBehind = true;
+                    }
+
+                    if (foundFront && foundBehind)
+                    {
+                        break;
+                    }
+                }
+
+                if (!foundFront)
+                {
+                    data.TimeDeltaFront = -1;
+                }
+
+                if (!foundBehind)
+                {
+                    data.TimeDeltaBehind = -1;
+                }
+            }
+
             data.DeltaBestSelf = CalcSectorDiff(shared.SectorTimesCurrentSelf, shared.SectorTimesPreviousSelf, shared.SectorTimesBestSelf);
             data.DeltaBestSession = CalcSectorDiff(shared.SectorTimesCurrentSelf, shared.SectorTimesPreviousSelf, shared.SectorTimesSessionBestLap);
 
@@ -287,21 +332,8 @@ namespace DashboardServer.Game
             Update?.Invoke(data);
         }
 
-        private float CalcSectorDiff(Sectors<float> current, Sectors<float> last, Sectors<float> best)
+        private float CalcSectorDiff(Sectors<float> compare, Sectors<float> best)
         {
-            if (best.Sector1 == 0 || current.Sector1 == 0)
-            {
-                return 0;
-            }
-            
-            // When a new fastest lap was driven the 'current' and 'best' sectors times are equal.
-            //Use the previous lap to show the delta when crossing the start/finish line.
-            Sectors<float> compare = current;
-            if (compare.Sector1 == best.Sector1 && compare.Sector2 == best.Sector2 && compare.Sector3 == best.Sector3)
-            {
-                compare = last;
-            }
-            
             if (compare.Sector3 > 0)
             {
                 return compare.Sector3 - best.Sector3;
@@ -318,6 +350,24 @@ namespace DashboardServer.Game
             }
 
             return 0;
+        }
+
+        private float CalcSectorDiff(Sectors<float> current, Sectors<float> last, Sectors<float> best)
+        {
+            if (best.Sector1 <= 0 || current.Sector1 <= 0)
+            {
+                return 0;
+            }
+            
+            // When a new fastest lap was driven the 'current' and 'best' sectors times are equal.
+            //Use the previous lap to show the delta when crossing the start/finish line.
+            Sectors<float> compare = current;
+            if (compare.Sector1 == best.Sector1 && compare.Sector2 == best.Sector2 && compare.Sector3 == best.Sector3)
+            {
+                compare = last;
+            }
+
+            return CalcSectorDiff(compare, best);
         }
             
         private double ConvertPressureToPsi(float pressure)
