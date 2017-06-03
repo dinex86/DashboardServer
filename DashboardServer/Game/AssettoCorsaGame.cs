@@ -169,8 +169,6 @@ namespace DashboardServer.Game
                     data.CurrentFlag = (int) ExchangeData.FlagIndex.PENALTY;
                     break;
             }
-
-            Update?.Invoke(data);
         }
 
         private void UpdateExchangeData(StaticInfo staticInfo)
@@ -195,8 +193,6 @@ namespace DashboardServer.Game
             data.DrsEquipped = staticInfo.HasDRS;
             data.ErsEquipped = staticInfo.HasERS;
             data.KersEquipped = staticInfo.HasKERS;
-
-            Update?.Invoke(data);
         }
 
         private void UpdateExchangeData(Physics physics)

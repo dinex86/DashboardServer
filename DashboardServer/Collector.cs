@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AssettoCorsaSharedMemory;
 using DashboardServer.Game;
+using SharpDX.DirectInput;
 
 namespace DashboardServer
 {
@@ -18,9 +19,14 @@ namespace DashboardServer
     {
         public delegate void UpdateEventHandler(ExchangeData data);
         public event UpdateEventHandler Update;
+        private List<int> detectedButtonPresses = new List<int>();
 
         public void Run()
         {
+            ControllerListener controllerListener = new ControllerListener();
+            controllerListener.ButtonPressed += ButtonPressed;
+            controllerListener.Listen();
+
             List<AbstractGame> games = new List<AbstractGame>();
             games.Add(new AssettoCorsaGame());
             games.Add(new RaceRoomGame());
@@ -59,10 +65,22 @@ namespace DashboardServer
             }
         }
 
+        private void ButtonPressed(int button)
+        {
+            if (!detectedButtonPresses.Contains(button))
+            {
+                detectedButtonPresses.Add(button);
+            }
+        }
+
         private void DataUpdated(ExchangeData data)
         {
             if (Update != null)
             {
+                data.PressedButtons.Clear();
+                data.PressedButtons.AddRange(detectedButtonPresses);
+                detectedButtonPresses.Clear();
+
                 Update(data);
             }
         }

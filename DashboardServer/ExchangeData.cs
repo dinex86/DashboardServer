@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
@@ -10,10 +11,14 @@ namespace DashboardServer
 		{
 			LastTimeInPit = -1;
 			LastTimeOnTrack = -1;
-		}
+            DamageAerodynamics = -1;
+            DamageEngine = -1;
+            DamageTransmission = -1;
+            PressedButtons = new List<int>();
+        }
 
-		public enum FlagIndex
-		{
+		public enum FlagIndex : int
+        {
 			NO_FLAG = -1,
 			GREEN = 0,
 			YELLOW = 1,
@@ -25,23 +30,23 @@ namespace DashboardServer
 			PENALTY = 7
 		}
 
-		public enum RaceFormatIndex
-		{
+		public enum RaceFormatIndex : int
+        {
 			NOT_AVAILABLE = -1,
 			TIME = 0,
 			LAP = 1,
 			TIME_AND_EXTRA_LAP = 2
 		}
 
-		public enum SessionIndex
-		{
+		public enum SessionIndex : int
+        {
 			UNKNOWN = -1,
 			PRACTICE = 0,
 			QUALIFY = 1,
 			RACE = 2
 		}
 
-		// Internal.
+        // Internal.
 		private double _fuelLeftLastLap = -1;
 
 		// Basic data.
@@ -50,8 +55,11 @@ namespace DashboardServer
 		public int MaxEngineRpm { get; internal set; }
 		public int EngineRpm { get; internal set; }
 
-		// DRS.
-		public int DrsEquipped { get; internal set; }
+        // Button presses.
+        public List<int> PressedButtons { get; internal set; }
+
+        // DRS.
+        public int DrsEquipped { get; internal set; }
 		public int DrsAvailable { get; internal set; }
 		public int DrsEngaged { get; internal set; }
 		public int DrsNumActivationsLeft { get; internal set; }
@@ -216,9 +224,9 @@ namespace DashboardServer
 		public int YellowSector3 { get; internal set; }
 
         // Damage.
-        public float DamageAerodynamics { get; internal set; }
-        public float DamageEngine { get; internal set; }
-        public float DamageTransmission { get; internal set; }
+        public double DamageAerodynamics { get; internal set; }
+        public double DamageEngine { get; internal set; }
+        public double DamageTransmission { get; internal set; }
 
         // Timestamps.
         public long LastTimeInPit { get; internal set; }
@@ -270,8 +278,12 @@ namespace DashboardServer
 				{
 					niceValue = ((long)value).ToString("0", CultureInfo.CreateSpecificCulture("EN-us"));
 				}
+                else if (value is List<int>)
+                {
+                    niceValue = "\"" + String.Join(",", (List<int>) value) + "\"";
+                }
 
-				sb.AppendFormat("\"{0}\":{1}", prop.Name, niceValue);
+                sb.AppendFormat("\"{0}\":{1}", prop.Name, niceValue);
 
 				appender = ",";
 			}
