@@ -111,6 +111,8 @@ namespace DashboardServer.Game
 
         private void UpdateExchangeData(Shared shared)
         {
+            bool isPlayer = shared.ControlType == 0;
+
             // Session info.
             switch (shared.SessionLengthFormat)
             {
@@ -141,7 +143,7 @@ namespace DashboardServer.Game
             data.SessionIteration = shared.SessionIteration;
 
             // ControlType 0 = Player
-            if (((shared.LapTimeCurrentSelf >= 0 && data.LapTimeCurrentSelf < 0) || (shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf && shared.TrackSector != data.CurrentSector)) && shared.ControlType == 0)
+            if (((shared.LapTimeCurrentSelf >= 0 && data.LapTimeCurrentSelf < 0) || (shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf && shared.TrackSector != data.CurrentSector)) && isPlayer)
             {
                 data.TriggerFuelCalculation();
             }
@@ -171,13 +173,16 @@ namespace DashboardServer.Game
             data.WaterTemperature = shared.EngineWaterTemp;
 
             // Misc.
-            data.FuelLeft = shared.FuelLeft;
+            data.FuelLeft = isPlayer ? shared.FuelLeft : -1;
             data.NumberOfLaps = (shared.SessionLengthFormat == 0) ? shared.NumberOfLaps : -1;
             data.CompletedLaps = shared.CompletedLaps;
             data.Position = shared.Position;
             data.NumCars = shared.NumCars;
             data.PitLimiter = shared.PitLimiter;
             data.InPitLane = shared.InPitlane;
+            data.BreakBias = shared.BrakeBias;
+            //shared.BrakeTemp.
+            //shared.
 
             // Damage.
             data.DamageAerodynamics = shared.CarDamage.Aerodynamics;

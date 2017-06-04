@@ -35,7 +35,7 @@ namespace DashboardServer
             {
                 if (joystick == null)
                 {
-                    Thread.Sleep(5000);
+                    Thread.Sleep(1000);
                     continue;
                 }
 
@@ -54,6 +54,8 @@ namespace DashboardServer
                         
                         ButtonPressed((int)state.Offset);
                     }
+
+                    Thread.Sleep(25);
                 }
             }
         }

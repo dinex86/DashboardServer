@@ -15,6 +15,7 @@ namespace DashboardServer
             DamageEngine = -1;
             DamageTransmission = -1;
             PressedButtons = new List<int>();
+            BreakBias = -1;
         }
 
 		public enum FlagIndex : int
@@ -160,8 +161,8 @@ namespace DashboardServer
 		public int RaceFormat { get; internal set; }
 		public int Session { get; internal set; }
 		public int SessionIteration { get; internal set; }
-
-		public int Position { get; internal set; }
+        public double BreakBias { get; internal set; }
+        public int Position { get; internal set; }
 		public int NumCars { get; internal set; }
 		public int PitLimiter { get; internal set; }
 		public int InPitLane { get; internal set; }
@@ -232,7 +233,7 @@ namespace DashboardServer
         public long LastTimeInPit { get; internal set; }
 		public long LastTimeOnTrack { get; internal set; }
 
-		public void TriggerFuelCalculation()
+        public void TriggerFuelCalculation()
 		{
 			if (_fuelLeftLastLap > -1 && FuelLeft > -1 && _fuelLeftLastLap > FuelLeft)
 			{
