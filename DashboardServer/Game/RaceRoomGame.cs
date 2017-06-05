@@ -1,14 +1,10 @@
 ﻿using R3E;
 using R3E.Data;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DashboardServer.Game
 {
@@ -111,6 +107,7 @@ namespace DashboardServer.Game
 
         private void UpdateExchangeData(Shared shared)
         {
+            // ControlType 0 = Player.
             bool isPlayer = shared.ControlType == 0;
 
             // Session info.
@@ -142,8 +139,9 @@ namespace DashboardServer.Game
 
             data.SessionIteration = shared.SessionIteration;
 
-            // ControlType 0 = Player
-            if (((shared.LapTimeCurrentSelf >= 0 && data.LapTimeCurrentSelf < 0) || (shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf && shared.TrackSector != data.CurrentSector)) && isPlayer)
+            // Add 5% to lap distance fraction to prevent from triggering while spinning or after a crash.
+            if (isPlayer && shared.LapDistanceFraction < data.LapDistanceFraction - 0.05)
+            //if (((shared.LapTimeCurrentSelf >= 0 && data.LapTimeCurrentSelf < 0) || (shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf && shared.TrackSector != data.CurrentSector)) && isPlayer)
             {
                 data.TriggerFuelCalculation();
             }
@@ -153,6 +151,17 @@ namespace DashboardServer.Game
             data.Gear = shared.Gear;
             data.MaxEngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.MaxEngineRps));
             data.EngineRpm = (int)Math.Round(Utilities.RpsToRpm(shared.EngineRps));
+            data.FuelLeft = isPlayer ? shared.FuelLeft : -1;
+            data.NumberOfLaps = (shared.SessionLengthFormat == 0) ? shared.NumberOfLaps : -1;
+            data.CompletedLaps = shared.CompletedLaps;
+            data.Position = shared.Position;
+            data.NumCars = shared.NumCars;
+            data.PitLimiter = shared.PitLimiter;
+            data.InPitLane = shared.InPitlane;
+            data.BreakBias = shared.BrakeBias;
+            data.LapDistanceFraction = shared.LapDistanceFraction;
+            data.TractionControl = -1;
+            data.Abs = -1;
 
             // DRS.
             data.DrsAvailable = shared.Drs.Available;
@@ -171,19 +180,13 @@ namespace DashboardServer.Game
             // Temps.
             data.OilTemperature = shared.EngineOilTemp;
             data.WaterTemperature = shared.EngineWaterTemp;
-
-            // Misc.
-            data.FuelLeft = isPlayer ? shared.FuelLeft : -1;
-            data.NumberOfLaps = (shared.SessionLengthFormat == 0) ? shared.NumberOfLaps : -1;
-            data.CompletedLaps = shared.CompletedLaps;
-            data.Position = shared.Position;
-            data.NumCars = shared.NumCars;
-            data.PitLimiter = shared.PitLimiter;
-            data.InPitLane = shared.InPitlane;
-            data.BreakBias = shared.BrakeBias;
-            //shared.BrakeTemp.
-            //shared.
-
+            
+            // Break temps.
+            data.BreakTempFrontLeft = Math.Round(shared.BrakeTemp.FrontLeft, 1);
+            data.BreakTempFrontRight = Math.Round(shared.BrakeTemp.FrontRight, 1);
+            data.BreakTempRearLeft = Math.Round(shared.BrakeTemp.RearLeft, 1);
+            data.BreakTempRearRight = Math.Round(shared.BrakeTemp.RearRight, 1);
+            
             // Damage.
             data.DamageAerodynamics = shared.CarDamage.Aerodynamics;
             data.DamageEngine = shared.CarDamage.Engine;

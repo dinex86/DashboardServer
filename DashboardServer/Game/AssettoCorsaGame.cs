@@ -1,10 +1,5 @@
 ﻿using AssettoCorsaSharedMemory;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DashboardServer.Game
 {
@@ -143,7 +138,7 @@ namespace DashboardServer.Game
                     data.LastTimeInPit = Now;
                 }
             }
-
+            
             // Flags.
             switch (graphics.Flag)
             {
@@ -160,7 +155,7 @@ namespace DashboardServer.Game
                     data.CurrentFlag = (int) ExchangeData.FlagIndex.CHECKERED;
                     break;
                 case AC_FLAG_TYPE.AC_NO_FLAG:
-                    data.CurrentFlag = (int) ExchangeData.FlagIndex.GREEN;
+                    data.CurrentFlag = (int)ExchangeData.FlagIndex.NO_FLAG;
                     break;
                 case AC_FLAG_TYPE.AC_WHITE_FLAG:
                     data.CurrentFlag = (int) ExchangeData.FlagIndex.WHITE;
@@ -185,7 +180,7 @@ namespace DashboardServer.Game
             {
                 data.RaceFormat = (int)ExchangeData.RaceFormatIndex.LAP;
             }
-
+            
             data.MaxEngineRpm = staticInfo.MaxRpm;
             data.FuelMax = staticInfo.MaxFuel;
             data.NumCars = staticInfo.NumCars;
@@ -204,8 +199,17 @@ namespace DashboardServer.Game
             data.FuelLeft = physics.Fuel;
             data.DrsAvailable = physics.DrsAvailable;
             data.DrsEngaged = physics.DrsEnabled;
+            data.BreakBias = physics.BrakeBias;
             //data.PitLimiter = physics.PitLimiterOn; // doesn't work, only 1 when speed = speed limit
-
+            data.TractionControl = physics.TC;
+            data.Abs = physics.Abs;
+            
+            // Break temps.
+            data.BreakTempFrontLeft = Math.Round(physics.BrakeTemp[0], 1);
+            data.BreakTempFrontRight = Math.Round(physics.BrakeTemp[1], 1);
+            data.BreakTempRearLeft = Math.Round(physics.BrakeTemp[2], 1);
+            data.BreakTempRearRight = Math.Round(physics.BrakeTemp[3], 1);
+            
             // Tire temps.
             data.TireTempFrontLeft = Math.Round(physics.TyreCoreTemperature[0], 1);
             data.TireTempFrontRight = Math.Round(physics.TyreCoreTemperature[1], 1);
