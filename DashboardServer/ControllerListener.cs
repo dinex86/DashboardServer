@@ -12,7 +12,7 @@ namespace DashboardServer
     class ControllerListener
     {
         private DirectInput directInput = new DirectInput();
-        private Joystick joystick = null;
+        private Joystick controller = null;
         List<int> detectedButtonPresses = new List<int>();
 
         public delegate void ButtonPressedEventHandler(int button);
@@ -27,13 +27,13 @@ namespace DashboardServer
 
         private void Run()
         {
-            Thread findControllerThread = new Thread(new ThreadStart(SearchForGamepads));
+            Thread findControllerThread = new Thread(new ThreadStart(SearchForController));
             findControllerThread.Start();
             
             // Poll events from joystick
             while (true)
             {
-                if (joystick == null)
+                if (controller == null)
                 {
                     Thread.Sleep(1000);
                     continue;
@@ -41,26 +41,34 @@ namespace DashboardServer
 
                 if (ButtonPressed != null)
                 {
-                    joystick.Poll();
-                    var datas = joystick.GetBufferedData();
-
-                    foreach (var state in datas)
+                    try
                     {
-                        // Only use buttons.
-                        if (state.Value <= 0 || state.Offset < JoystickOffset.Buttons0 || state.Offset > JoystickOffset.Buttons127)
-                        {
-                            continue;
-                        }
-                        
-                        ButtonPressed((int)state.Offset);
-                    }
+                        controller.Poll();
+                        var datas = controller.GetBufferedData();
 
-                    Thread.Sleep(25);
+                        foreach (var state in datas)
+                        {
+                            // Only use buttons.
+                            if (state.Value <= 0 || state.Offset < JoystickOffset.Buttons0 || state.Offset > JoystickOffset.Buttons127)
+                            {
+                                continue;
+                            }
+
+                            ButtonPressed((int)state.Offset);
+                        }
+
+                        Thread.Sleep(25);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Lost joystick. Start looking for a new one.");
+                        controller = null;
+                    }
                 }
             }
         }
 
-        private void SearchForGamepads()
+        private void SearchForController()
         {
             while (true)
             {
@@ -82,23 +90,23 @@ namespace DashboardServer
                 }
 
                 // If Joystick not found, throws an error
-                if (joystickGuid != Guid.Empty && (joystick == null || !joystick.Information.InstanceGuid.Equals(joystickGuid)))
+                if (joystickGuid != Guid.Empty && (controller == null || !controller.Information.InstanceGuid.Equals(joystickGuid)))
                 {
-                    if (joystick != null)
+                    if (controller != null)
                     {
-                        joystick.Unacquire();
+                        controller.Unacquire();
                     }
                     
                     // Instantiate the joystick
-                    joystick = new Joystick(directInput, joystickGuid);
+                    controller = new Joystick(directInput, joystickGuid);
 
                     Console.WriteLine("Found Joystick/Gamepad with GUID: {0}", joystickGuid);
                     
                     // Set BufferSize in order to use buffered data.
-                    joystick.Properties.BufferSize = 128;
+                    controller.Properties.BufferSize = 128;
 
                     // Acquire the joystick
-                    joystick.Acquire();
+                    controller.Acquire();
                 }
 
                 Thread.Sleep(5000);
