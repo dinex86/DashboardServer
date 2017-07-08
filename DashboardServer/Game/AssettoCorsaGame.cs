@@ -87,6 +87,7 @@ namespace DashboardServer.Game
             if (graphics.CurrentSectorIndex < data.CurrentSector)
             {
                 data.TriggerFuelCalculation();
+                data.CurrentLapValid = 1; // New lap is always valid.
             }
 
             data.CompletedLaps = graphics.CompletedLaps;
@@ -203,7 +204,10 @@ namespace DashboardServer.Game
             //data.PitLimiter = physics.PitLimiterOn; // doesn't work, only 1 when speed = speed limit
             data.TractionControl = physics.TC;
             data.Abs = physics.Abs;
-            
+
+            // Lap time valid?
+            data.CurrentLapValid = data.CurrentLapValid == 1 && physics.NumberOfTyresOut < 3 ? 1 : data.CurrentLapValid;
+
             // Break temps.
             data.BreakTempFrontLeft = Math.Round(physics.BrakeTemp[0], 1);
             data.BreakTempFrontRight = Math.Round(physics.BrakeTemp[1], 1);
@@ -240,6 +244,12 @@ namespace DashboardServer.Game
 
             // Delta.
             data.DeltaBestSelf = physics.PerformanceMeter;
+
+            // Car damage.
+            // 0 + 4 => tires front?
+            // 1 => ?
+            // 2 + 3 => tires rear?
+            //Console.WriteLine(physics.CarDamage);
 
             Update?.Invoke(data);
         }

@@ -109,6 +109,7 @@ namespace DashboardServer.Game
         {
             // ControlType 0 = Player.
             bool isPlayer = shared.ControlType == 0;
+            bool isDriving = shared.GameInMenus != 1 && shared.GamePaused != 1;
 
             // Session info.
             switch (shared.SessionLengthFormat)
@@ -140,9 +141,10 @@ namespace DashboardServer.Game
             data.SessionIteration = shared.SessionIteration;
 
             // Add 5% to lap distance fraction to prevent from triggering while spinning or after a crash.
-            if (isPlayer && shared.LapDistanceFraction < data.LapDistanceFraction - 0.05)
+            if (isPlayer && shared.LapDistanceFraction < data.LapDistanceFraction - 0.05 && isDriving)
             //if (((shared.LapTimeCurrentSelf >= 0 && data.LapTimeCurrentSelf < 0) || (shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf && shared.TrackSector != data.CurrentSector)) && isPlayer)
             {
+                data.LastLapStart = (long)Math.Round(Now - Math.Round(shared.LapTimeCurrentSelf, 3) * 1000);
                 data.TriggerFuelCalculation();
             }
 
@@ -217,7 +219,8 @@ namespace DashboardServer.Game
             data.TireDirtRearRight = Math.Round(shared.TireDirt.RearRight, 1);
 
             // Timing.
-            data.LapTimeCurrentSelf = Math.Round(shared.LapTimeCurrentSelf, 3);
+            data.CurrentLapValid = shared.CurrentLapValid;
+            data.LapTimeCurrentSelf = Math.Round(shared.CurrentLapValid > 0 ? shared.LapTimeCurrentSelf : (data.LastLapStart > 0 ? ((isDriving ? Now : data.LastTimeOnTrack) - data.LastLapStart) / 1000.0 : -1), 3);
             data.LapTimePreviousSelf = Math.Round(shared.LapTimePreviousSelf, 3);
             data.LapTimeBestSelf = Math.Round(shared.LapTimeBestSelf, 3);
             data.LapTimeBestLeader = Math.Round(shared.LapTimeBestLeader, 3);
@@ -318,11 +321,11 @@ namespace DashboardServer.Game
             }
 
             // Timestamps.
-            if (shared.InPitlane == 1)
+            if (shared.InPitlane == 1 || shared.GameInMenus == 1)
             {
                 data.LastTimeInPit = Now;
 
-                if (data.LastTimeOnTrack <= 0)
+                if (shared.GameInMenus == 1 || data.LastTimeOnTrack <= 0)
                 {
                     data.LastTimeOnTrack = Now;
                 }

@@ -75,7 +75,7 @@ namespace DashboardServer
                 var joystickGuid = Guid.Empty;
 
                 // Search for wheels.
-                foreach (var deviceInstance in directInput.GetDevices(DeviceType.Driving, DeviceEnumerationFlags.AllDevices))
+                foreach (var deviceInstance in directInput.GetDevices(DeviceType.Driving, DeviceEnumerationFlags.AttachedOnly))
                 {
                     joystickGuid = deviceInstance.InstanceGuid;
                 }
@@ -83,7 +83,7 @@ namespace DashboardServer
                 // Use gamepad as fallback.
                 if (joystickGuid == Guid.Empty)
                 {
-                    foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
+                    foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AttachedOnly))
                     {
                         joystickGuid = deviceInstance.InstanceGuid;
                     }
@@ -109,7 +109,10 @@ namespace DashboardServer
                     controller.Acquire();
                 }
 
-                Thread.Sleep(5000);
+                while (controller != null)
+                {
+                    Thread.Sleep(5000);
+                }
             }
         }
     }

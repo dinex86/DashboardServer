@@ -179,6 +179,7 @@ namespace DashboardServer
         public double SessionTimeRemaining { get; internal set; }
         public double LapTimeBestLeader { get; internal set; }
         public double LapTimeBestLeaderClass { get; internal set; }
+        public int CurrentLapValid { get; internal set; }
 
         // Deltas.
         public double DeltaBestSelf { get; internal set; }
@@ -242,6 +243,7 @@ namespace DashboardServer
         // Timestamps.
         public long LastTimeInPit { get; internal set; }
         public long LastTimeOnTrack { get; internal set; }
+        public long LastLapStart { get; internal set; }
 
         public void TriggerFuelCalculation()
         {
