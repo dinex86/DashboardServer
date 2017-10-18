@@ -18,6 +18,8 @@ namespace DashboardServer
             BreakBias = -1;
             Abs = -1;
             TractionControl = -1;
+            CurrentLapValid = 1;
+            LastLapValid = 1;
         }
 
         public enum FlagIndex : int
@@ -180,6 +182,7 @@ namespace DashboardServer
         public double LapTimeBestLeader { get; internal set; }
         public double LapTimeBestLeaderClass { get; internal set; }
         public int CurrentLapValid { get; internal set; }
+        public int LastLapValid { get; internal set; }
 
         // Deltas.
         public double DeltaBestSelf { get; internal set; }

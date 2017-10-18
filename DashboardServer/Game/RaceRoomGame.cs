@@ -111,6 +111,9 @@ namespace DashboardServer.Game
             bool isPlayer = shared.ControlType == 0;
             bool isDriving = shared.GameInMenus != 1 && shared.GamePaused != 1;
 
+            // Add 5% to lap distance fraction to prevent from triggering while spinning or after a crash.
+            bool newLapStart = isPlayer && shared.LapDistanceFraction < data.LapDistanceFraction - 0.05 && isDriving && shared.LapTimeCurrentSelf > 0 && shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf;
+
             // Session info.
             switch (shared.SessionLengthFormat)
             {
@@ -140,11 +143,22 @@ namespace DashboardServer.Game
 
             data.SessionIteration = shared.SessionIteration;
 
-            // Add 5% to lap distance fraction to prevent from triggering while spinning or after a crash.
-            if (isPlayer && shared.LapDistanceFraction < data.LapDistanceFraction - 0.05 && isDriving)
-            //if (((shared.LapTimeCurrentSelf >= 0 && data.LapTimeCurrentSelf < 0) || (shared.LapTimeCurrentSelf < data.LapTimeCurrentSelf && shared.TrackSector != data.CurrentSector)) && isPlayer)
+            
+            if (newLapStart)
             {
-                data.LastLapStart = (long)Math.Round(Now - Math.Round(shared.LapTimeCurrentSelf, 3) * 1000);
+
+                Console.WriteLine("-- NEW LAP DETECTED --");
+
+                double currentLapTimeInMillis = Math.Round(shared.LapTimeCurrentSelf, 3) * 1000;
+                double currentLapStartTimeInMillis = Math.Round(Now - currentLapTimeInMillis);
+                if (data.CurrentLapValid != 1)
+                {
+                    data.LapTimePreviousSelf = Math.Round((currentLapStartTimeInMillis - data.LastLapStart) / 1000, 3);
+                    data.LastLapValid = 0;
+                    Console.WriteLine("set last insvalid");
+                }
+
+                data.LastLapStart = (long)currentLapStartTimeInMillis;
                 data.TriggerFuelCalculation();
             }
 
@@ -221,13 +235,24 @@ namespace DashboardServer.Game
             // Timing.
             data.CurrentLapValid = shared.CurrentLapValid;
             data.LapTimeCurrentSelf = Math.Round(shared.CurrentLapValid > 0 ? shared.LapTimeCurrentSelf : (data.LastLapStart > 0 ? ((isDriving ? Now : data.LastTimeOnTrack) - data.LastLapStart) / 1000.0 : -1), 3);
-            data.LapTimePreviousSelf = Math.Round(shared.LapTimePreviousSelf, 3);
+
+            if (shared.LapTimePreviousSelf > 0)
+            {
+                if (data.LastLapValid == 0)
+                {
+                    Console.WriteLine("set last valid");
+                    data.LastLapValid = 1;
+                }
+                data.LapTimePreviousSelf = Math.Round(shared.LapTimePreviousSelf, 3);
+            }
+
             data.LapTimeBestSelf = Math.Round(shared.LapTimeBestSelf, 3);
             data.LapTimeBestLeader = Math.Round(shared.LapTimeBestLeader, 3);
             data.LapTimeBestLeaderClass = Math.Round(shared.LapTimeBestLeaderClass, 3);
             data.SessionTimeRemaining = Math.Round(shared.SessionTimeRemaining, 3);
             data.LapTimeDeltaLeader = Math.Round(shared.LapTimeDeltaLeader, 3);
             data.LapTimeDeltaLeaderClass = Math.Round(shared.LapTimeDeltaLeaderClass, 3);
+            
 
             // Delta.
             if (data.Session == (int)ExchangeData.SessionIndex.RACE)

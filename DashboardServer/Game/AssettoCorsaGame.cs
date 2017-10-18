@@ -87,6 +87,8 @@ namespace DashboardServer.Game
             if (graphics.CurrentSectorIndex < data.CurrentSector)
             {
                 data.TriggerFuelCalculation();
+
+                data.LastLapValid = data.CurrentLapValid;
                 data.CurrentLapValid = 1; // New lap is always valid.
             }
 
@@ -123,6 +125,8 @@ namespace DashboardServer.Game
             // Timestamps.
             if (graphics.IsInPitLane == 1)
             {
+                data.CurrentLapValid = 1;
+
                 data.LastTimeInPit = Now;
 
                 if (data.LastTimeOnTrack <= 0)
@@ -206,7 +210,7 @@ namespace DashboardServer.Game
             data.Abs = physics.Abs;
 
             // Lap time valid?
-            data.CurrentLapValid = data.CurrentLapValid == 1 && physics.NumberOfTyresOut < 3 ? 1 : data.CurrentLapValid;
+             data.CurrentLapValid = physics.NumberOfTyresOut < 3 ? data.CurrentLapValid : 0;
 
             // Break temps.
             data.BreakTempFrontLeft = Math.Round(physics.BrakeTemp[0], 1);
