@@ -30,6 +30,7 @@ namespace DashboardServer
             List<AbstractGame> games = new List<AbstractGame>();
             games.Add(new AssettoCorsaGame());
             games.Add(new RaceRoomGame());
+            games.Add(new PCarsGame());
 
             Console.WriteLine("Looking for a game...");
             
