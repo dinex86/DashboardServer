@@ -33,9 +33,10 @@ namespace DashboardServer.Game
 
             // ControlType 0 = Player.
             bool isPlayer = true;
-            bool isDriving = (int)shared.mPitMode != (int)ePitMode.PIT_MODE_IN_GARAGE;
             bool inPit = (int)shared.mPitMode == (int)ePitMode.PIT_MODE_DRIVING_INTO_PITS || (int)shared.mPitMode == (int)ePitMode.PIT_MODE_IN_PIT || (int)shared.mPitMode == (int)ePitMode.PIT_MODE_DRIVING_OUT_OF_PITS;
-            
+            bool inMenus = (int)shared.mGameState != (int)eGameState.GAME_INGAME_PAUSED;
+            bool isDriving = (int)shared.mGameState == (int)eGameState.GAME_INGAME_PLAYING && !inMenus;
+
             // Add 5% to lap distance fraction to prevent from triggering while spinning or after a crash.
             bool newLapStart = isPlayer && player.mCurrentLapDistance < player.mCurrentLapDistance - 0.05 && isDriving && shared.mCurrentTime > 0 && shared.mCurrentTime < data.LapTimeCurrentSelf;
 
@@ -75,7 +76,7 @@ namespace DashboardServer.Game
             {
                 Console.WriteLine("-- NEW LAP DETECTED --");
 
-                double currentLapTimeInMillis = Math.Round(shared.LapTimeCurrentSelf, 3) * 1000;
+                double currentLapTimeInMillis = Math.Round(shared.mCurrentTime, 3) * 1000;
                 double currentLapStartTimeInMillis = Math.Round(Now - currentLapTimeInMillis);
                 if (data.CurrentLapValid != 1)
                 {
@@ -89,7 +90,7 @@ namespace DashboardServer.Game
             }
 
             // General.
-            data.CarSpeed = (int)Math.Round(shared.mSpeed);
+            data.CarSpeed = (int)Math.Floor(shared.mSpeed * 3.6); // m/s -> km/h
             data.Gear = shared.mGear;
             data.MaxEngineRpm = (int)Math.Round(shared.mMaxRPM);
             data.EngineRpm = (int)Math.Round(shared.mRPM);
@@ -104,22 +105,21 @@ namespace DashboardServer.Game
             data.LapDistanceFraction = player.mCurrentLapDistance / shared.mTrackLength;
             data.TractionControl = -1;
             data.Abs = -1;
-            
-            /*
+
+
             // DRS.
-            data.DrsAvailable = shared.drs
-            data.DrsEngaged = shared.Drs.Engaged;
-            data.DrsEquipped = shared.Drs.Equipped;
-            data.DrsNumActivationsLeft = shared.Drs.NumActivationsLeft;
-            
+            data.DrsAvailable = -1; //shared.drs
+            data.DrsEngaged = -1; //shared.Drs.Engaged;
+            data.DrsEquipped = -1; //shared.Drs.Equipped;
+            data.DrsNumActivationsLeft = -1; //shared.Drs.NumActivationsLeft;
+
             // P2P.
-            data.PushToPassEquipped = shared.PushToPass.Available;
-            data.PushToPassAvailable = shared.PushToPass.Available;
-            data.PushToPassEngaged = shared.PushToPass.Engaged;
-            data.PushToPassNumActivationsLeft = shared.PushToPass.AmountLeft;
-            data.PushToPassEngagedTimeLeft = shared.PushToPass.EngagedTimeLeft;
-            data.PushToPassWaitTimeLeft = shared.PushToPass.WaitTimeLeft;
-            */
+            data.PushToPassEquipped = -1; //shared.PushToPass.Available;
+            data.PushToPassAvailable = -1; //shared.PushToPass.Available;
+            data.PushToPassEngaged = -1; //shared.PushToPass.Engaged;
+            data.PushToPassNumActivationsLeft = -1; //shared.PushToPass.AmountLeft;
+            data.PushToPassEngagedTimeLeft = -1; //shared.PushToPass.EngagedTimeLeft;
+            data.PushToPassWaitTimeLeft = -1; //shared.PushToPass.WaitTimeLeft;
 
             // Temps.
             data.OilTemperature = shared.mOilTempCelsius;
@@ -132,13 +132,11 @@ namespace DashboardServer.Game
             data.BreakTempFrontRight = Math.Round(shared.mBrakeTempCelsius[(int)eTyres.TYRE_FRONT_RIGHT], 1);
             data.BreakTempRearLeft = Math.Round(shared.mBrakeTempCelsius[(int)eTyres.TYRE_REAR_LEFT], 1);
             data.BreakTempRearRight = Math.Round(shared.mBrakeTempCelsius[(int)eTyres.TYRE_REAR_RIGHT], 1);
-            
+
             // Damage.
-            /*
-            data.DamageAerodynamics = shared.CarDamage.Aerodynamics;
-            data.DamageEngine = shared.CarDamage.Engine;
-            data.DamageTransmission = shared.CarDamage.Transmission;
-            */
+            data.DamageAerodynamics = -1; //shared.CarDamage.Aerodynamics;
+            data.DamageEngine = -1; //shared.CarDamage.Engine;
+            data.DamageTransmission = -1; //shared.CarDamage.Transmission;
 
             // Tire temps.
             data.TireTempFrontLeft = Math.Round(shared.mTyreTemp[(int)eTyres.TYRE_FRONT_LEFT], 1);
@@ -147,26 +145,22 @@ namespace DashboardServer.Game
             data.TireTempRearRight = Math.Round(shared.mTyreTemp[(int)eTyres.TYRE_REAR_RIGHT], 1);
 
             // Tire wear.
-            data.TireWearFrontLeft = Math.Round(shared.mTyreWear[(int)eTyres.TYRE_FRONT_LEFT], 3);
-            data.TireWearFrontRight = Math.Round(shared.mTyreWear[(int)eTyres.TYRE_FRONT_RIGHT], 3);
-            data.TireWearRearLeft = Math.Round(shared.mTyreWear[(int)eTyres.TYRE_REAR_LEFT], 3);
-            data.TireWearRearRight = Math.Round(shared.mTyreWear[(int)eTyres.TYRE_REAR_RIGHT], 3);
+            data.TireWearFrontLeft = Math.Round(1.0 - shared.mTyreWear[(int)eTyres.TYRE_FRONT_LEFT], 3);
+            data.TireWearFrontRight = Math.Round(1.0 - shared.mTyreWear[(int)eTyres.TYRE_FRONT_RIGHT], 3);
+            data.TireWearRearLeft = Math.Round(1.0 - shared.mTyreWear[(int)eTyres.TYRE_REAR_LEFT], 3);
+            data.TireWearRearRight = Math.Round(1.0 - shared.mTyreWear[(int)eTyres.TYRE_REAR_RIGHT], 3);
 
             // Tire pressure.
-            /*
-            data.TirePressureFrontLeft = Math.Round(ConvertPressureToPsi(shared.tyre[(int)eTyres.TYRE_FRONT_LEFT]), 1);
-            data.TirePressureFrontRight = Math.Round(ConvertPressureToPsi(shared.TirePressure[(int)eTyres.TYRE_FRONT_RIGHT]), 1);
-            data.TirePressureRearLeft = Math.Round(ConvertPressureToPsi(shared.TirePressure[(int)eTyres.TYRE_REAR_LEFT]), 1);
-            data.TirePressureRearRight = Math.Round(ConvertPressureToPsi(shared.TirePressure[(int)eTyres.TYRE_REAR_RIGHT]), 1);
-            */
+            data.TirePressureFrontLeft = -1; //Math.Round(ConvertPressureToPsi(shared.tyre[(int)eTyres.TYRE_FRONT_LEFT]), 1);
+            data.TirePressureFrontRight = -1; //Math.Round(ConvertPressureToPsi(shared.TirePressure[(int)eTyres.TYRE_FRONT_RIGHT]), 1);
+            data.TirePressureRearLeft = -1; //Math.Round(ConvertPressureToPsi(shared.TirePressure[(int)eTyres.TYRE_REAR_LEFT]), 1);
+            data.TirePressureRearRight = -1; //Math.Round(ConvertPressureToPsi(shared.TirePressure[(int)eTyres.TYRE_REAR_RIGHT]), 1);
 
             // Tire dirt.
-            /*
-            data.TireDirtFrontLeft = Math.Round(shared.[(int)eTyres.TYRE_FRONT_LEFT], 1);
-            data.TireDirtFrontRight = Math.Round(shared.TireDirt[(int)eTyres.TYRE_FRONT_RIGHT], 1);
-            data.TireDirtRearLeft = Math.Round(shared.TireDirt[(int)eTyres.TYRE_REAR_LEFT], 1);
-            data.TireDirtRearRight = Math.Round(shared.TireDirt[(int)eTyres.TYRE_REAR_RIGHT], 1);
-            */
+            data.TireDirtFrontLeft = -1; //Math.Round(shared.[(int)eTyres.TYRE_FRONT_LEFT], 1);
+            data.TireDirtFrontRight = -1; //Math.Round(shared.TireDirt[(int)eTyres.TYRE_FRONT_RIGHT], 1);
+            data.TireDirtRearLeft = -1; //Math.Round(shared.TireDirt[(int)eTyres.TYRE_REAR_LEFT], 1);
+            data.TireDirtRearRight = -1; //Math.Round(shared.TireDirt[(int)eTyres.TYRE_REAR_RIGHT], 1);
 
             // Timing.
             data.CurrentLapValid = shared.mLapInvalidated ? 0 : 1;
@@ -239,12 +233,11 @@ namespace DashboardServer.Game
             }
 
             // Timestamps.
-            /*
-            if (shared.InPitlane == 1 || shared.GameInMenus == 1)
+            if (inPit)
             {
                 data.LastTimeInPit = Now;
 
-                if (shared.GameInMenus == 1 || data.LastTimeOnTrack <= 0)
+                if (inMenus || data.LastTimeOnTrack <= 0)
                 {
                     data.LastTimeOnTrack = Now;
                 }
@@ -258,7 +251,7 @@ namespace DashboardServer.Game
                     data.LastTimeInPit = Now;
                 }
             }
-            */
+
             UpdateHandler?.Invoke(data);
         }
     }
