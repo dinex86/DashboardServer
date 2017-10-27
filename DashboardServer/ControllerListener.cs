@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace DashboardServer
 {
-    
     class ControllerListener
     {
         private DirectInput directInput = new DirectInput();

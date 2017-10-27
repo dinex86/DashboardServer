@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DashboardServer.Game
+namespace DashboardCore.Game
 {
     abstract class AbstractGame
     {

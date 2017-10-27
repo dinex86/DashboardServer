@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using pCarsAPI_Demo;
 
-namespace DashboardServer.Game
+namespace DashboardCore.Game
 {
     class PCarsGame : MemoryMappedGame<pCarsAPIStruct>
     {

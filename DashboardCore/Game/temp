@@ -1,4 +1,4 @@
-﻿using R3E;
+using R3E;
 using R3E.Data;
 using System;
 using System.IO;
@@ -8,12 +8,8 @@ using System.Threading;
 
 namespace DashboardServer.Game
 {
-    class RaceRoomGame : AbstractGame
+    class RaceRoomGame : MemoryMappedGame<Shared>
     {
-        public override event UpdateEventHandler Update;
-        
-        private Thread updateThread = null;
-
         public override bool IsRunning
         {
             get
@@ -22,90 +18,13 @@ namespace DashboardServer.Game
             }
         }
 
-        public override void Start()
-        {
-            Console.WriteLine("Starting collector for RaceRoom Racing Experience!");
-
-            updateThread = new Thread(new ThreadStart(Run));
-            updateThread.Start();
-        }
-
-        public override void Stop()
-        {
-            Console.WriteLine("Starting collector for RaceRoom Racing Experience!");
-
-            if (updateThread != null)
-            {
-                updateThread.Abort();
+        protected override String SharedMemoryName {
+            get {
+                return R3E.Constant.SharedMemoryName;
             }
         }
 
-        private void Run()
-        {
-            while (IsRunning)
-            {
-                MemoryMappedFile file = null;
-
-                try
-                {
-                    Console.WriteLine("Mapping R3E shared memory...");
-
-                    byte[] buffer = null;
-                    while (file == null)
-                    {
-                        try
-                        {
-                            file = MemoryMappedFile.OpenExisting(Constant.SharedMemoryName);
-                            buffer = new Byte[Marshal.SizeOf(typeof(Shared))];
-
-                            Console.WriteLine("Memory mapped successfully.");
-                        }
-                        catch (FileNotFoundException)
-                        {
-                            // Game not ready, wait a little bit.
-                            Thread.Sleep(1000);
-                            continue;
-                        }
-                    }
-
-                    while (true)
-                    {
-                        if (Update != null)
-                        {
-                            var view = file.CreateViewStream();
-                            BinaryReader stream = new BinaryReader(view);
-                            buffer = stream.ReadBytes(Marshal.SizeOf(typeof(Shared)));
-                            GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-
-                            Shared data = (Shared)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(Shared));
-                            handle.Free();
-                            stream.Close();
-                            view.Close();
-
-                            UpdateExchangeData(data);
-                        }
-
-                        Thread.Sleep(50);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Exception occured! " + e.Message);
-                }
-                finally
-                {
-                    if (file != null)
-                    {
-                        file.Dispose();
-                        file = null;
-                    }
-                }
-            }
-
-            Console.WriteLine("All done with R3E!");
-        }
-
-        private void UpdateExchangeData(Shared shared)
+        protected override void UpdateExchangeData(Shared shared)
         {
             // ControlType 0 = Player.
             bool isPlayer = shared.ControlType == 0;
@@ -364,8 +283,8 @@ namespace DashboardServer.Game
                     data.LastTimeInPit = Now;
                 }
             }
-
-            Update?.Invoke(data);
+            
+            UpdateHandler?.Invoke(data);
         }
 
         private float CalcSectorDiff(Sectors<float> compare, Sectors<float> best)

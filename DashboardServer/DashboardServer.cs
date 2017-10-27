@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Net.Sockets;
-using System.Net.WebSockets;
 using System.Threading;
-using System.Net;
-using System.Text;
-using R3E;
 using WebSocketSharp.Server;
 using WebSocketSharp;
-using DashboardServer.Game;
+using DashboardCore;
 
 namespace DashboardServer
 {
@@ -52,7 +45,7 @@ namespace DashboardServer
 
     class DashboardServer
     {
-        public static Collector Listener = new Collector();
+        public static Collector Listener = new DashboardCore.Collector();
 
         public static void Main(string[] args)
         {

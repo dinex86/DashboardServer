@@ -10,12 +10,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AssettoCorsaSharedMemory;
-using DashboardServer.Game;
-using SharpDX.DirectInput;
+using DashboardCore.Game;
 
-namespace DashboardServer
+namespace DashboardCore
 {
-    class Collector
+    public class Collector
     {
         public delegate void UpdateEventHandler(ExchangeData data);
         public event UpdateEventHandler Update;
@@ -23,14 +22,10 @@ namespace DashboardServer
 
         public void Run()
         {
-            ControllerListener controllerListener = new ControllerListener();
-            controllerListener.ButtonPressed += ButtonPressed;
-            controllerListener.Listen();
-
             List<AbstractGame> games = new List<AbstractGame>();
             games.Add(new AssettoCorsaGame());
             games.Add(new RaceRoomGame());
-            games.Add(new PCarsGame());
+            //games.Add(new PCarsGame());
 
             Console.WriteLine("Looking for a game...");
             

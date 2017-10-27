@@ -7,7 +7,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>DashboardServer</RootNamespace>
     <AssemblyName>DashboardServer</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -72,37 +72,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collector.cs" />
     <Compile Include="ControllerListener.cs" />
     <Compile Include="DashboardServer.cs" />
-    <Compile Include="ExchangeData.cs" />
-    <Compile Include="Game\AssettoCorsaGame.cs" />
-    <Compile Include="Game\AbstractGame.cs" />
-    <Compile Include="Game\MemoryMappedGame.cs" />
-    <Compile Include="Game\PCarsGame.cs" />
-    <Compile Include="Game\RaceRoomGame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="R3E\R3E.cs" />
-    <Compile Include="R3E\Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\assettocorsasharedmemory\AssettoCorsaSharedMemory.csproj">
-      <Project>{020af3ed-0a4c-4215-9b1d-1d41dd26f8bb}</Project>
-      <Name>AssettoCorsaSharedMemory</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ProjectCarsSharedMemory\ProjectCarsSharedMemory.csproj">
-      <Project>{8562be05-1e3c-4075-914c-54566d5e5dc4}</Project>
-      <Name>ProjectCarsSharedMemory</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -124,6 +105,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="speedometer.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DashboardCore2\DashboardCore.csproj">
+      <Project>{07bd8eb6-1da2-4b92-8113-a97c27d530ab}</Project>
+      <Name>DashboardCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

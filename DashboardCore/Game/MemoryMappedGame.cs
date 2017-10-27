@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DashboardServer.Game
+namespace DashboardCore.Game
 {
     abstract class MemoryMappedGame<Test> : AbstractGame
     {

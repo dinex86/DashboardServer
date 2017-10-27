@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.4</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\assettocorsasharedmemory\AssettoCorsaSharedMemory.csproj" />
+    <ProjectReference Include="..\ProjectCarsSharedMemory\ProjectCarsSharedMemory.csproj" />
+  </ItemGroup>
+
+</Project>
