@@ -86,7 +86,7 @@
     <Content Include="speedometer.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DashboardCore2\DashboardCore.csproj">
+    <ProjectReference Include="..\DashboardCore\DashboardCore.csproj">
       <Project>{07bd8eb6-1da2-4b92-8113-a97c27d530ab}</Project>
       <Name>DashboardCore</Name>
     </ProjectReference>

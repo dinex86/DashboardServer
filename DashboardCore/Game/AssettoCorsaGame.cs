@@ -24,7 +24,7 @@ namespace DashboardCore.Game
 
         public AssettoCorsaGame()
         {
-            ac.StaticInfoInterval = 5000; // Get StaticInfo updates ever 5 seconds
+            ac.StaticInfoInterval = 1000; // Get StaticInfo updates ever 1 seconds
             ac.PhysicsInterval = 50; // Getting physics every 50 ms should be okay.
             ac.GraphicsInterval = 50;
             ac.Start();
@@ -185,8 +185,12 @@ namespace DashboardCore.Game
             {
                 data.RaceFormat = (int)ExchangeData.RaceFormatIndex.LAP;
             }
-            
-            data.MaxEngineRpm = staticInfo.MaxRpm;
+
+            if (staticInfo.MaxRpm > 0)
+            {
+                data.MaxEngineRpm = staticInfo.MaxRpm;
+            }
+
             data.FuelMax = staticInfo.MaxFuel;
             data.NumCars = staticInfo.NumCars;
 
@@ -201,6 +205,12 @@ namespace DashboardCore.Game
             data.CarSpeed = (int) Math.Floor(physics.SpeedKmh);
             data.Gear = physics.Gear - 1;
             data.EngineRpm = physics.Rpms;
+
+            if (physics.Rpms > data.MaxEngineRpm)
+            {
+                data.MaxEngineRpm = physics.Rpms;
+            }
+
             data.FuelLeft = physics.Fuel;
             data.DrsAvailable = physics.DrsAvailable;
             data.DrsEngaged = physics.DrsEnabled;

@@ -14,7 +14,7 @@ using DashboardCore.Game;
 
 namespace DashboardCore
 {
-    class Collector
+    public class Collector
     {
         public delegate void UpdateEventHandler(ExchangeData data);
         public event UpdateEventHandler Update;
@@ -22,14 +22,10 @@ namespace DashboardCore
 
         public void Run()
         {
-            ControllerListener controllerListener = new ControllerListener();
-            controllerListener.ButtonPressed += ButtonPressed;
-            controllerListener.Listen();
-
             List<AbstractGame> games = new List<AbstractGame>();
             games.Add(new AssettoCorsaGame());
             games.Add(new RaceRoomGame());
-            games.Add(new PCarsGame());
+            //games.Add(new PCarsGame());
 
             Console.WriteLine("Looking for a game...");
             

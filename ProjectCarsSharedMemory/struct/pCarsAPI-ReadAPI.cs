@@ -29,7 +29,7 @@ namespace pCarsAPI_Demo
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -57,7 +57,7 @@ namespace pCarsAPI_Demo
 
                 return new Tuple<bool,pCarsAPIStruct>(true, _pcarsapistruct);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //return false in the tuple as the read failed
                 return new Tuple<bool, pCarsAPIStruct>(false, _pcarsapistruct);

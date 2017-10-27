@@ -54,7 +54,7 @@ namespace DashboardTm1638
         {
             if (IsConnected)
             {
-                collectorThread.Suspend();
+                collectorThread.Interrupt();
                 port.Close();
             }
         }

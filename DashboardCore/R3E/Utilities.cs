@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace R3E
 {
-    public class Utilities
+    class Utilities
     {
         public static Single RpsToRpm(Single rps)
         {
