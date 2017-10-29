@@ -20,6 +20,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DashboardCore", "DashboardC
 		{020AF3ED-0A4C-4215-9B1D-1D41DD26F8BB} = {020AF3ED-0A4C-4215-9B1D-1D41DD26F8BB}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ArduinoTM1638", "ArduinoTM1638", "{583F8F0A-67BD-4026-9296-C33367998949}"
+	ProjectSection(SolutionItems) = preProject
+		arduino.pde = arduino.pde
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Ubuntu|Any CPU = Debug_Ubuntu|Any CPU
