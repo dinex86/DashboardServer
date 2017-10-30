@@ -33,7 +33,7 @@ namespace DashboardCore.Game
         public override void Start()
         {
             Console.WriteLine("Starting collector for Assetto Corsa!");
-
+            
             // Initial read.
             UpdateExchangeData(ac.ReadStaticInfo());
             UpdateExchangeData(ac.ReadGraphics());

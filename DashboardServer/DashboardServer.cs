@@ -45,12 +45,12 @@ namespace DashboardServer
 
     class DashboardServer
     {
-        public static Collector Listener = new DashboardCore.Collector();
+        public static GameDataCollector Listener = new DashboardCore.GameDataCollector();
 
         public static void Main(string[] args)
         {
             // Start listener as separate thread.
-            Listener = new Collector();
+            Listener = new GameDataCollector();
             Thread listenerThread = new Thread(new ThreadStart(Listener.Run));
             listenerThread.Start();
 

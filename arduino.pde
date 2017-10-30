@@ -7,8 +7,8 @@ word leds [10] = { 0, 1, 3, 7, 2063, 6175, 14399, 30783, 63551, 65280 };
 byte buttons, oldbuttons, page;
 byte gear, spd_h, spd_l, shift, rpm_h, rpm_l, pitLimiter, fuel, fuelLaps, waterTemp, oilTemp, lap, laps, pos, cars, minutes, seconds, millis_h, millis_l;
 word rpm, spd, milliseconds;
-boolean changedPage, blinkLeds;
-unsigned long milstart, milstart2 = 0;s
+boolean changedPage, blinkrpm;
+unsigned long milstart, milstart2 = 0;
 char s[8];
 
 void setup() {
@@ -31,7 +31,7 @@ void setup() {
   oldbuttons = 0;
   page = 0;
   changedPage = false;
-  blinkLeds = false;
+  blinkrpm = false;
 }
 
 void loop() {
@@ -119,7 +119,13 @@ void loop() {
     switch (page) {
       case 1:
         // Gear / speed
-        sprintf(s, "%1s%7d", gear == 0 ? "R" : (gear == 1 ? "N" : "" + (gear - 1)), spd);
+        if (gear == 0) {
+          sprintf(s, "R%7d", spd);
+        } else if (gear == 1) {
+          sprintf(s, "N%7d", spd);
+        } else {
+          sprintf(s, "%1d%7d", gear - 1, spd);
+        }
         module.setDisplayToString(s);
         break;                                                                                                
       case 2:
@@ -167,12 +173,12 @@ void loop() {
   // LEDs.
   if (pitLimiter == 1 || shift == 10) {
     if ((millis() - milstart2) > (pitLimiter == 1 ? 150 : 75)) {
-      if (blinkLeds == false) {
+      if (blinkrpm == false) {
         module.setLEDs(0x0000);
-        blinkLeds = true;
+        blinkrpm = true;
       } else {
         module.setLEDs(pitLimiter == 1 ? 59136 : 0xFF00);
-        blinkLeds = false;
+        blinkrpm = false;
       }
       milstart2 = millis();
     }

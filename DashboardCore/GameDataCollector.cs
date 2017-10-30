@@ -14,7 +14,7 @@ using DashboardCore.Game;
 
 namespace DashboardCore
 {
-    public class Collector
+    public class GameDataCollector
     {
         public delegate void UpdateEventHandler(ExchangeData data);
         public event UpdateEventHandler Update;
@@ -23,12 +23,11 @@ namespace DashboardCore
         public void Run()
         {
             List<AbstractGame> games = new List<AbstractGame>();
-            games.Add(new AssettoCorsaGame());
-            games.Add(new RaceRoomGame());
-            //games.Add(new PCarsGame());
-
-            Console.WriteLine("Looking for a game...");
+            //games.Add(new AssettoCorsaGame());
+            //games.Add(new RaceRoomGame());
+            games.Add(new PCarsGame());
             
+            // Find the active game.
             AbstractGame runningGame = null;
             while (true)
             {

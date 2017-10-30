@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Collector.cs" />
+    <Compile Include="GameDataCollector.cs" />
     <Compile Include="ExchangeData.cs" />
     <Compile Include="Game\AbstractGame.cs" />
     <Compile Include="Game\AssettoCorsaGame.cs" />

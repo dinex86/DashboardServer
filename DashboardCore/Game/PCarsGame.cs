@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using pCarsAPI_Demo;
+using System.Diagnostics;
 
 namespace DashboardCore.Game
 {
@@ -15,7 +16,7 @@ namespace DashboardCore.Game
         {
             get
             {
-                return true;
+                return Process.GetProcessesByName("pCARS").Length > 0 || Process.GetProcessesByName("pCARS2").Length > 0  || Process.GetProcessesByName("pCARS2AVX").Length > 0;
             }
         }
 

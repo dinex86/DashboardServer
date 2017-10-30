@@ -18,7 +18,14 @@ namespace DashboardCore.Game
         {
             get
             {
-                return Utilities.IsRrreRunning();
+                try
+                {
+                    return Utilities.IsRrreRunning();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
 

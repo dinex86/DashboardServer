@@ -48,21 +48,47 @@ namespace DashboardTm1638
             if (!handler.IsConnected)
             {
                 handler.Connect(cboPorts.SelectedItem.ToString());
+                handler.Start();
                 btnStartStop.Text = "Stop";
                 //btnTest.Enabled = false;
+
+                btnTest.Enabled = false;
             }
             else
             {
+                handler.Stop();
                 handler.Disconnect();
                 btnStartStop.Text = "Start";
                 //tmr.Enabled = false;
                 //cmbSerial.Text = "Start";
                 //btnTest.Enabled = true;
+
+                btnTest.Enabled = true;
             }
         }
 
         private void btnTest_Click(object sender, EventArgs e)
         {
+            if (!handler.IsConnected)
+            {
+                handler.Connect(cboPorts.SelectedItem.ToString());
+                handler.StartTest();
+                btnTest.Text = "Stop";
+                //btnTest.Enabled = false;
+
+                btnStartStop.Enabled = false;
+            }
+            else
+            {
+                handler.StopTest();
+                handler.Disconnect();
+                btnTest.Text = "Test";
+                //tmr.Enabled = false;
+                //cmbSerial.Text = "Start";
+                //btnTest.Enabled = true;
+
+                btnStartStop.Enabled = true;
+            }
         }
 
         private void cboPorts_SelectedIndexChanged(object sender, EventArgs e)
