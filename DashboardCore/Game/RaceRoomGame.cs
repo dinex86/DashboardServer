@@ -14,18 +14,11 @@ namespace DashboardCore.Game
         
         private Thread updateThread = null;
 
-        public override bool IsRunning
+        public override string[] GameExecutables
         {
             get
             {
-                try
-                {
-                    return Utilities.IsRrreRunning();
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
+                return new string[] { "RRRE" };
             }
         }
 

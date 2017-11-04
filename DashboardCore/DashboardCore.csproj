@@ -44,6 +44,7 @@
     <Compile Include="ExchangeData.cs" />
     <Compile Include="Game\AbstractGame.cs" />
     <Compile Include="Game\AssettoCorsaGame.cs" />
+    <Compile Include="Game\F12017Game.cs" />
     <Compile Include="Game\MemoryMappedGame.cs" />
     <Compile Include="Game\PCarsGame.cs" />
     <Compile Include="Game\RaceRoomGame.cs" />

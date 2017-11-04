@@ -9,31 +9,27 @@ namespace DashboardCore.Game
         
         private AssettoCorsa ac = new AssettoCorsa();
 
-        public override bool IsRunning
+        public override string[] GameExecutables
         {
             get
             {
-                if (ac == null)
-                {
-                    return false;
-                }
-                
-                return ac.IsRunning;
+                return new string[] { "acs_x86", "acs" };
             }
         }
 
         public AssettoCorsaGame()
         {
-            ac.StaticInfoInterval = 1000; // Get StaticInfo updates ever 1 seconds
+            ac.StaticInfoInterval = 1000; // Get StaticInfo updates every second.
             ac.PhysicsInterval = 50; // Getting physics every 50 ms should be okay.
             ac.GraphicsInterval = 50;
-            ac.Start();
         }
 
         public override void Start()
         {
             Console.WriteLine("Starting collector for Assetto Corsa!");
-            
+
+            ac.Start();
+
             // Initial read.
             UpdateExchangeData(ac.ReadStaticInfo());
             UpdateExchangeData(ac.ReadGraphics());

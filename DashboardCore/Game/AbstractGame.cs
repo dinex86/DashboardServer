@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,23 @@ namespace DashboardCore.Game
 
         public abstract event UpdateEventHandler Update;
 
-        public abstract bool IsRunning { get; }
+        public bool IsRunning {
+            get
+            {
+                foreach (String gameExecutable in GameExecutables)
+                {
+                    if (Process.GetProcessesByName(gameExecutable.Replace(".exe", "")).Length > 0)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+        }
+
+        public abstract String[] GameExecutables { get; }
 
         public abstract void Start();
 

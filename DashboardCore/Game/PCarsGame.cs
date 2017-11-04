@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO.MemoryMappedFiles;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using pCarsAPI_Demo;
 using System.Diagnostics;
 
@@ -12,14 +6,14 @@ namespace DashboardCore.Game
 {
     class PCarsGame : MemoryMappedGame<pCarsAPIStruct>
     {
-        public override bool IsRunning
+        public override string[] GameExecutables
         {
             get
             {
-                return Process.GetProcessesByName("pCARS").Length > 0 || Process.GetProcessesByName("pCARS2").Length > 0  || Process.GetProcessesByName("pCARS2AVX").Length > 0;
+                return new string[] { "pCARS2", "pCARS2AVX", "pCARS" };
             }
         }
-
+        
         protected override string SharedMemoryName
         {
             get

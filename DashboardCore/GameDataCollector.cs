@@ -22,41 +22,51 @@ namespace DashboardCore
 
         public void Run()
         {
-            List<AbstractGame> games = new List<AbstractGame>();
-            //games.Add(new AssettoCorsaGame());
-            //games.Add(new RaceRoomGame());
-            games.Add(new PCarsGame());
-            
+            List<AbstractGame> games = new List<AbstractGame>
+            {
+                new AssettoCorsaGame(),
+                new RaceRoomGame(),
+                new PCarsGame(),
+                new F12017Game()
+            };
+
             // Find the active game.
             AbstractGame runningGame = null;
             while (true)
             {
-                while (runningGame == null)
+                try
                 {
-                    foreach (AbstractGame game in games)
+                    while (runningGame == null)
                     {
-                        if (game.IsRunning)
+                        foreach (AbstractGame game in games)
                         {
-                            runningGame = game;
-                            runningGame.Update += DataUpdated;
-                            runningGame.Start();
-                            break;
+                            if (game.IsRunning)
+                            {
+                                runningGame = game;
+                                runningGame.Update += DataUpdated;
+                                runningGame.Start();
+                                break;
+                            }
                         }
+
+                        Thread.Sleep(1000);
                     }
 
+                    // Game still running?
+                    if (runningGame != null && !runningGame.IsRunning)
+                    {
+                        DataUpdated(new ExchangeData()); // Send empty data.
+                        runningGame.Stop();
+                        runningGame = null;
+                    }
+
+                    // Wait for next try.
                     Thread.Sleep(1000);
                 }
-
-                // Game still running?
-                if (runningGame != null && !runningGame.IsRunning)
+                catch (Exception e)
                 {
-                    DataUpdated(new ExchangeData()); // Send empty data.
-                    runningGame.Stop();
-                    runningGame = null;
+                    Console.WriteLine("Something went wrong in this game: " + e.Message);
                 }
-
-                // Wait for next try.
-                Thread.Sleep(1000);
             }
         }
 
